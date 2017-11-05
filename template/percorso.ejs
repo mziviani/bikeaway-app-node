@@ -1,0 +1,206 @@
+<% include parziale/head %>
+
+    
+
+      <div class="container-fluid">
+        <section class="row">
+          <div class="col-sm-12" style="padding: 0px; width:100%; height:500px;" id="map">
+
+          </div>
+        </section>
+      </div>
+
+      <div class="background-red">
+        <aside class="container" id="other-pins">
+          <div class="row">
+            <div class="col-sm-12 col-xs-12">
+              <a href="#" class="visible-xs-block	"><span class="glyphicon glyphicon-list" aria-hidden="true"></span>opzioni mappa</a>
+              <label><input type="checkbox" name="fontanelle" value="1" />Fontanelle</label>
+              <label><input type="checkbox" name="parcheggi" value="2" />Parcheggi auto</label>
+              <label><input type="checkbox" name="bar" value="3" />Bar</label>
+              <label><input type="checkbox" name="ristoranti" value="4" />Ristoranti</label>
+              <label><input type="checkbox" name="alert" value="5" />Alert Utenti</label>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <article class="container" id="scheda">
+        <div class="row">
+          <nav class="col-sm-12">
+            <ul>
+              <li><a href="">home</a> <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></li>
+              <li><a href="">livello 2</a> <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></li>
+              <li><a href="">livello 3</a></li>
+            </ul>
+          </nav>
+          <header class="col-sm-12">
+            <h1>Alla scoperta del centro di Verona</h1>
+          </header>
+        </div>
+        <div class="row" id="content">
+            <div class="col-sm-9">
+              <p>Scopriamo Verona in bicicletta per scoprire i monumenti e i quartieri più
+                affascinanti dimenticati anche dai cittadini veneti.
+                Durante il percorso potrete trovare osterie e trattorie come un tempo per poter
+                assaporare tutta la tradizione veronese.</p>
+              <p class="tags"><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> Relax, Città e paesi</p>
+
+              <div class="row" id="dettagli">
+                <div class="col-sm-3">
+                    Difficoltà <span class="full"></span><span></span><span></span>
+                </div>
+                <div class="col-sm-3">
+                    Pendenza <strong>2%</strong>
+                </div>
+                <div class="col-sm-3">
+                    Tipo di strada <strong>asfalto</strong>
+                </div>
+                <div class="col-sm-3">
+                    Adatto ai bambini <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                </div>
+                <div class="col-sm-3 lunghezza">
+                    <div>Lunghezza <strong>20 Km</strong></div>
+                </div>
+                <div class="col-sm-3" id="tempo">
+                    Tempo <strong>1:12:00</strong>
+                </div>
+              </div>
+
+              <p class="note"><strong>note</strong> questa è una nota</p>
+            </div>
+            <aside class="col-sm-3">
+              <div class="background-yellow">
+                  <h3>Annunci</h3>
+                  <h4>Hotel Bologna</h4>
+                  <p>4 stelle, moderno, con ristorante chic<br/>
+                    <a href="#">vai al sito</a>
+                  </p>
+                  <h4>Ristorante trattoria al borgo</h4>
+                  <p>$ristorante vegano<br/>
+                    <a href="#">vai al sito</a>
+                  </p>
+              </div>
+            </aside>
+        </div>
+        <article class="row" id="commenti">
+          <header class="col-sm-9  ">
+            <h2>Commenti</h2>
+          </header>
+          <div class="clearfix"></div>
+
+          <div class="col-sm-9" style="margin-bottom:16px;">
+            <div class="row background-red" style="margin:0px">
+              <section class="col-sm-9" id="menu1">
+
+                  <label for="commentType">Filtra Commenti</label> <select name="commentType" id="commentType">
+                                                            <option value="-1">Tutti</option>
+                                                            <option value="0">Generali</option>
+                                                            <option value="1">Tappa 1</option>
+                                                            <option value="2">Tappa 2</option>
+                                                            <option value="3">Tappa 3</option>
+                                                          </select>
+
+              </section>
+              <section class="col-sm-3" id="menu2">
+
+                  <a href="#">Inserisci commento</a>
+
+              </section>
+            </div>
+          </div>
+
+          <div class="clearfix"></div>
+          <section class="col-sm-9" style="margin-bottom:24px;" id="areaInserimento">
+            <form method="post" action="/insert-comment" class="row">
+
+                <div class="col-sm-12"><label for="typec">Tipo di commento </label><br/>
+                  <select name="typec" id="typec">
+                                                            <option value="1">Generale</option>
+                                                            <option value="2">Tappa 1</option>
+                                                            <option value="3">Tappa 2</option>
+                                                            <option value="4">Tappa 3</option>
+                                                          </select>
+                </div>
+                <div class="col-sm-6">
+                  <label for="nome">Nome </label><br/>
+                  <input type="text" name="nome" id="nome" required  />
+                </div>
+                <div class="col-sm-6">
+                  <label for="email">Email </label><br/>
+                  <input type="email" name="email" id="email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,8}$" required  />
+                </div>
+
+                <div class="clearfix"></div>
+                <div class="col-sm-12">
+                  <label for="commento">Commento</label><br/>
+                  <textarea id="commento" name="commento" required></textarea>
+                </div>
+                <div class="col-sm-9"><em>I campi sono tutti obbligatori</em></div>
+                <div class="col-sm-3"><input type="submit" value="inserisci"></div>
+
+              <!--  <div class="col-md-12"><p class="msg wait">messaggio</p></div>-->
+
+            </form>
+          </section>
+
+          <div class="clearfix"></div>
+          <article class="col-sm-9 corpo-commento">
+            <p>1.12.16 | <strong>Alex88</strong><br/>
+              questo è un commento di alex 88<br/>ciao ciao ciao
+            </p>
+          </article>
+          <article class="col-sm-9 corpo-commento">
+            <p>1.12.16 | <strong>Alex88</strong><br/>
+              questo è un commento di alex 88<br/>ciao ciao ciao
+            </p>
+          </article>
+          <article class="col-sm-9 corpo-commento">
+            <div class="tappa">1</div>
+            <p>1.12.16 | <strong>Alex88</strong><br/>
+                  questo è un commento di alex 88<br/>ciao ciao ciao
+            </p>
+
+          </article>
+          <article class="col-sm-9 corpo-commento">
+            <div class="tappa">2</div>
+            <p>1.12.16 | <strong>Alex88</strong><br/>
+                  questo è un commento di alex 88<br/>ciao ciao ciao
+            </p>
+
+          </article>
+          <article class="col-sm-9 corpo-commento">
+            <div class="tappa">1</div>
+            <p>1.12.16 | <strong>Alex88</strong><br/>
+                  questo è un commento di alex 88<br/>ciao ciao ciao
+            </p>
+
+          </article>
+
+          <article class="col-sm-9 corpo-commento">
+            <p>1.12.16 | <strong>Alex88</strong><br/>
+              questo è un commento di alex 88<br/>ciao ciao ciao
+            </p>
+          </article>
+        </article>
+      </article>
+
+      <% include parziale/footer %>
+
+
+  <!-- inserire google analytics -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDHISEgt5-1Z6cK7pyntyeQ9ffd3TJa11k&callback=initMapScheda"></script>
+  <script src="/js/jquery.cookie.js"></script>
+  <script src="/js/bikeaway.js"></script>
+  <script>
+  $('document').ready(init);
+
+  function init() {
+    initCookie();
+    initScheda();
+
+  }
+  </script>
+  </body>
+</html>

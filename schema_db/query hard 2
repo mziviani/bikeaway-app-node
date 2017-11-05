@@ -1,0 +1,60 @@
+db.getCollection('category').aggregate([
+    {$match:  {
+                  publish: true
+                 }
+     },
+    { $lookup: {
+                from: "percorsi",
+                localField: "_id",
+                foreignField: "scheda._idcategory",
+                as: "percorsi"
+
+            }
+
+     },
+
+
+     {  $project: {   "title": 1,
+                      "image": 1,
+                      "order":1,
+                     "percorsi": {
+                                             $filter: {
+                                                          input: "$percorsi",
+                                                          as: "percorsi",
+                                                          cond: {
+                                                                    "$eq": ["$$percorsi.scheda.publish", true]
+                                                                }
+                                                        }
+
+                                 }
+
+                    }
+
+      },
+        {$unwind:"$percorsi"},
+        {$sort:{"percorsi.scheda.title":1}},
+        {$group: {_id:"$_id",
+                  title: {$first:"$title"},
+                  image: {$first:"$image"},
+                  order: {$first: "$order"},
+                  percorsi: {$push: "$percorsi"}}
+               },
+      {  $project: {
+                       "title": 1,
+                      "image": 1,
+                      "order":1,
+                     "percorsi": {
+                                   $slice: ["$percorsi.scheda", 3]
+
+
+                                  },
+
+
+
+                    }
+
+      }, {
+            $sort: {order: 1}
+          }
+
+    ]).toArray()

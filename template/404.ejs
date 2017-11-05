@@ -1,0 +1,131 @@
+<% include parziale/head %>
+
+      <section class="background-image-home border-red" id="search-background">
+        <header class="container"  id="search">
+          <div class="row">
+            <div class="col-sm-12" id="search-title">
+              <h1>Siamo spiacenti<br/> ma la pagina non è disponibile</h1>
+              <h2>fai una <strong>ricerca</strong> o seleziona una <strong>categoria</strong></h2>
+            </div>
+            <div class="col-sm-12" id="search-field">
+              <form method="get" action="/search">
+               <div id="search-field-group">
+                  <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                  <input name="q" type="text" autocomplete="off" placeholder="Inserisci una parola o location" size="40" pattern=".{3,}" tabindex="1"  required />
+                  <!-- suggerimenti -->
+                  <!--<div id="tips" class="border-red">
+                    <h6>Suggerimenti</h6>
+                    <ul>
+                      <li><a href="a" tabindex="2">suggerimento 1</a></li>
+                      <li><a href="b" tabindex="3">suggerimento 2</a></li>
+                      <li><a href="c" tabindex="4" class="background-yellow">suggerimento 3</a></li>
+                    </ul>
+                  </div>-->
+
+                </div>
+                <input type="submit" value="cerca percorso" tabindex="16">
+                <div id="search-advanced-view">
+                  <a href="#" tabindex="5"><span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span></a>
+                 <!-- ricerca avanzata opzioni *larghezza da calcolare in javascript*-->
+                    <div id="search-advanced-options" class="row background-red">
+                        <div class="col-sm-4">
+                          <h6>Caratteristiche</h6>
+                          <label for="lung">lunghezza max.</label><input type="text" name="lung" id="lung" tabindex="6" placeholder="Km" pattern="[0-9]+{0,3}" maxlength="3"/><br/>
+                          <label for="pend">pendenza max.</label><input type="text" name="pend" id="pend" tabindex="7" placeholder="%" pattern="[0-9]+{0,3}" maxlength="3"  /><br/>
+                          <label for="type">tipo di strada</label><select name="type" id="type" tabindex="8">
+                                                                    <option value="0">tutte</option>
+                                                                    <option value="1">asfalto</option>
+                                                                    <option value="2">terra</option>
+                                                                    <option value="3">ghiaia</option>
+                                                                    <option value="4">misto</option>
+                                                                  </select><br/>
+                          <label for="diff">difficoltà</label><select id="diff" name="diff" tabindex="9">
+                                                                    <option value="0">tutte</option>
+                                                                    <option value="1">*</option>
+                                                                    <option value="2">**</option>
+                                                                    <option value="3">***</option>
+                                                                  </select><br/>
+                        </div>
+                        <div class="col-sm-4 col-sm-push-0 col-xs-6 col-xs-push-6">
+                          <label><input type="checkbox" name="bambini" value="1" tabindex="10" />vicino a me</label><br />
+                          <label><input type="checkbox" name="vicino" value="1" tabindex="11"  />adatto ai bambini</label><br/>
+                        </div>
+                        <div class="col-sm-4 col-sm-pull-0 col-xs-6 col-xs-pull-6">
+                          <h6>Categorie</h6>
+                          <label><input type="checkbox" name="cat" value="family-slug" tabindex="12" /> family</label><br />
+                          <label><input type="checkbox" name="cat" value="sports-slug" tabindex="13"  /> sports</label><br/>
+                          <label><input type="checkbox" name="cat" value="relax-slug" tabindex="14"  /> relax</label><br/>
+                          <label><input type="checkbox" name="cat" value="cittaepaesi-slug" tabindex="15"  /> città e paesi</label>
+                        </div>
+                    </div>
+                    <!-- fine search -->
+                  </div>
+              </form>
+            </div>
+          </div>
+        </header>
+      </section>
+
+      <main class="container" id="percorsi">
+        <div class="row">
+          <header class="col-sm-12">
+              <h2>Percorsi</h2>
+            </header>
+        </div>
+        <article class="row">
+            <div class="col-sm-4" tabindex="19">
+             <header>
+               <a href="#">
+                 <h3>family</h3>
+                  <div><strong>vedi tutti</strong> i percorsi <strong>family</strong></div>
+                </a>
+              </header>
+            </div>
+
+
+            <div class="col-sm-4" tabindex="19">
+              <header style="background-image:url('images/sport.jpg')">
+                <a href="#">
+                  <h3>sports</h3>
+                  <div><strong>vedi tutti</strong> i percorsi <strong>sports</strong></div>
+                </a>
+              </header>
+            </div>
+
+            <div class="col-sm-4" tabindex="19">
+              <header style="background-image:url('images/relax.jpg')">
+                <a href="#">
+                  <h3>relax</h3>
+                  <div><strong>vedi tutti</strong> i percorsi <strong>relax</strong></div>
+                </a>
+              </header>
+            </div>
+        </article>
+
+        <article class="row">
+
+                      <div class="col-sm-4" tabindex="19">
+                        <header style="background-image:url('images/cittaepaesi.jpg')">
+                          <a href="#">
+                            <h3>città e paesi</h3>
+                            <div><strong>vedi tutti</strong> i percorsi <strong>città e paesi</strong></div>
+                          </a>
+                        </header>
+                      </div>
+        </article>
+
+
+        </main>
+
+      <div class="container-fluid">
+        <section class="row">
+          <div class="col-md-12" style="padding: 0px;">
+            mappa
+          </div>
+        </section>
+      </div>
+      <% include parziale/footer %>
+
+  <!-- inserire google analytics -->
+  </body>
+</html>
