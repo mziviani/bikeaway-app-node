@@ -27,6 +27,7 @@ app.use(express.static(__dirname + "/../template"));
 //pag 131
 app.use("/private/api/json/:slag_percorso", methodOverride());
 
+
 //MIDDLEWARE **********************************************************************************
 //example middelware
 /*app.use(function (req, res, next) {
@@ -96,7 +97,6 @@ app.get("/:slag_category", function(req,res) {
   } )
 })
 
-//index -> output template html
 // test con modulo esterno
 //app.get("/", ba.testFunctionIndex);
 app.get("/", function(req,res) {
@@ -162,7 +162,7 @@ app.get("/", function(req,res) {
                                                  },
                                                   { $unwind:"$percorsi" },
                                                   { $sort: {
-                                                            "percorsi.scheda.title":1
+                                                            "pusblish-date": -1
                                                             }
                                                   },
                                                   { $group: {
@@ -178,7 +178,7 @@ app.get("/", function(req,res) {
                                                             "image": 1,
                                                             "order":1,
                                                             "percorsi": {
-                                                                      $slice: ["$percorsi.scheda", 3]
+                                                                      $slice: ["$percorsi", 2]
                                                                         },
                                                                   }
                                                   }, {
@@ -189,6 +189,7 @@ app.get("/", function(req,res) {
                                                    ]).toArray(function(err,category) {
                                                      if(err) {
                                                        console.log("errore in index mongodb find: " + err);
+                                                       //redirect errore server
                                                        return
                                                      }
 
@@ -215,7 +216,15 @@ app.get("/", function(req,res) {
 // variabili get per recuperare la pagina ?page=n {1,2,3,n}
 // dimensione fissa
 // o paginazione via JS?
+/*app.use("/private/api/json/:slag_percorso", function(res,req,next) {
+  console.log("json")
+  res.header("Access-Control-Allow-Origin", "http://localhost:8080");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next()
+})*/
+
 app.get("/private/api/json/:slag_percorso", function(req,res) {
+
     res.end("carica commenti di " + req.params.slag_percorso);
 })
 
@@ -236,6 +245,8 @@ app.get("*", function(req,res) {
 // -> cron job per avvisi
 // -> parte amministrativa ?
 // redirect -> res.redirect(""/404")
+// api mailchimp
+// api akismet
 
 
 app.listen(8080);
