@@ -144,7 +144,7 @@
                <header  style="background-image:url('/images/<%= obj.image%>')">
                  <a href="/<%= obj._id %>">
                    <h3><%= obj.title %></h3>
-                    <div><strong>vedi tutti</strong> i percorsi <strong>family</strong></div>
+                    <div><strong>vedi tutti</strong> i percorsi <strong><%= obj._id %></strong></div>
                   </a>
                 </header>
               </div>
@@ -154,71 +154,23 @@
                         <h4><%= objPercorso.scheda.title %></h4>
                           <section>
                             <div class="row">
-                              <div class="col-md-9"><span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span> Valeggio sul Mincio (VR)</div>
-                              <div class="lunghezza col-md-3"><strong>20 Km</strong></div>
+                              <div class="col-md-9"><span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span> <%= objPercorso.scheda.txt_start %></div>
+                              <div class="lunghezza col-md-3"><strong><%= objPercorso.scheda.lunghezza %> Km</strong></div>
                             </div>
                               <div class="row dettagli">
-                                <div class="col-md-6">Difficoltà <span class="full"></span><span></span><span></span></div>
-                                <div class="col-md-6">Tempo <strong>1:11:00</strong></div>
+                                <div class="col-md-6">Difficoltà <% for (var i=1;i<4;i++) {%><span <% if (i<=objPercorso.scheda.difficolta) {%>class="full"<%}; %>></span><%};%></div>
+                                <div class="col-md-6">Tempo <strong>0:00:00</strong></div>
                                 <div class="clearfix"></div>
-                                <div class="col-md-6">Pendenza <strong>2%</strong></div>
-                                <div class="col-md-6">Strada <strong>asfalto</strong></div>
+                                <div class="col-md-6">Pendenza <strong><%= objPercorso.scheda.pendenza %>%</strong></div>
+                                <div class="col-md-6">Strada <strong><%= objPercorso.scheda.strada %></strong></div>
                               </div>
-                            <p><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> Relax, Città e paesi</p>
+                            <p><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> <%= objPercorso.scheda._idcategory %></p>
                         </section>
                       </a>
                     </article>
                   <% });%>
             </article>
         <% }); %>
-        <!--<article class="row">
-            <div class="col-sm-4" tabindex="19">
-             <header>
-               <a href="#">
-                 <h3><%= categoryObj[1].title %></h3>
-                  <div><strong>vedi tutti</strong> i percorsi <strong>family</strong></div>
-                </a>
-              </header>
-            </div>
-            <article class="col-sm-4 percorso" tabindex="20">
-              <a href="#">
-                <h4>La magia di Valeggio sul mincio</h4>
-                  <section>
-                    <div class="row">
-                      <div class="col-md-9"><span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span> Valeggio sul Mincio (VR)</div>
-                      <div class="lunghezza col-md-3"><strong>20 Km</strong></div>
-                    </div>
-                      <div class="row dettagli">
-                        <div class="col-md-6">Difficoltà <span class="full"></span><span></span><span></span></div>
-                        <div class="col-md-6">Tempo <strong>1:11:00</strong></div>
-                        <div class="clearfix"></div>
-                        <div class="col-md-6">Pendenza <strong>2%</strong></div>
-                        <div class="col-md-6">Strada <strong>asfalto</strong></div>
-                      </div>
-                    <p><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> Relax, Città e paesi</p>
-                </section>
-              </a>
-            </article>
-            <article class="col-sm-4 percorso">
-              <a href="#">
-                <h4>La magia di Valeggio sul mincio</h4>
-                  <section>
-                    <div class="row">
-                      <div class="col-md-9"><span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span> Valeggio sul Mincio (VR)</div>
-                      <div class="lunghezza col-md-3"><strong>20 Km</strong></div>
-                    </div>
-                      <div class="row dettagli">
-                        <div class="col-md-6">Difficoltà <span class="full"></span><span></span><span></span></div>
-                        <div class="col-md-6">Tempo <strong>1:11:00</strong></div>
-                        <div class="clearfix"></div>
-                        <div class="col-md-6">Pendenza <strong>2%</strong></div>
-                        <div class="col-md-6">Strada <strong>asfalto</strong></div>
-                      </div>
-                    <p><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> Relax, Città e paesi</p>
-                </section>
-              </a>
-            </article>
-        </article>-->
 
 
         <!-- pubblicità -->

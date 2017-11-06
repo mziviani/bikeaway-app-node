@@ -1,0 +1,1 @@
+c:\"Program Files"\mongodb\server\3.4\bin\mongod -dbpath c:\users\m.ziviani\desktop\pwm\applicazioneNode\db-mongodb
