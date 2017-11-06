@@ -407,10 +407,13 @@ app.get("*", function(req,res) {
 
 //to do
 // -> cron job per avvisi
-// -> parte amministrativa ?
-// redirect -> res.redirect(""/404")
+// ralizzare la parte di avvisi
+// -> parte amministrativa ? (no)
+//realizzare pagine statiche
+// realizzare redirect /505
 // api mailchimp
 // api akismet
+// sistemare filtering con javascript
 
 
 app.listen(8080);
