@@ -2,6 +2,7 @@ var express = require("express");
 var ba = require("./bikeaway-handlers/base");
 var methodOverride = require('method-override');
 var mongoClient = require('mongodb').MongoClient;
+var async = require("async");
 
 var app = express();
 
@@ -94,143 +95,146 @@ app.get("/cerca", function(req,res) {
 //categoria -> output template html
 app.get("/:slag_category",function(req,res) {
 
-  baDB.collection('category').aggregate([
-                                        {
-                                            $match: {
-                                                       _id:req.params.slag_category
-                                                    }
-                                        },
-                                        { $lookup: {
-                                                    from: "percorsi",
-                                                    localField: "_id",
-                                                    foreignField: "scheda._idcategory",
-                                                    as: "percorsi"
-                                                    }
-                                        },
-                                        {
-                                           $project: {
-                                                       "title":1,
-                                                       "percorsi": {
-                                                                    $filter: {
-                                                                                input:"$percorsi",
-                                                                                as: "percorsi",
-                                                                                cond: {
-                                                                                            $eq: ["$$percorsi.scheda.publish", true]
-                                                                                        }
-                                                                              }
+    var idCategoria = req.params.slag_category;
+
+    async.series([
+        function(callback) {
+          baDB.collection('category').aggregate([
+                                                {
+                                                    $match: {
+                                                               _id:idCategoria
+                                                            }
+                                                },
+                                                { $lookup: {
+                                                            from: "percorsi",
+                                                            localField: "_id",
+                                                            foreignField: "scheda._idcategory",
+                                                            as: "percorsi"
+                                                            }
+                                                },
+                                                {
+                                                   $project: {
+                                                               "title":1,
+                                                               "percorsi": {
+                                                                            $filter: {
+                                                                                        input:"$percorsi",
+                                                                                        as: "percorsi",
+                                                                                        cond: {
+                                                                                                    $eq: ["$$percorsi.scheda.publish", true]
+                                                                                                }
+                                                                                      }
 
 
-                                                                   }
-                                                      }
-                                        },
-                                         { $unwind:"$percorsi" },
-                                                  { $sort: {
-                                                            "percorsi.scheda.title":1
+                                                                           }
+                                                              }
+                                                },
+                                                 { $unwind:"$percorsi" },
+                                                          { $sort: {
+                                                                    "percorsi.scheda.title":1
+                                                                    }
+                                                          },
+                                                          { $group: {
+                                                                    _id:"$_id",
+                                                                    title: {$first:"$title"},
+                                                                    percorsi: {$push: "$percorsi"}
+                                                                    }
+                                                          }
+                                              ]).toArray(function(err,resPercorsi) {
+                                                                                    if(err) {
+                                                                                      callback(err);
+                                                                                    }
+
+                                                                                    //controllo il numero di percorsi -> 0 redirect 404
+                                                                                    if (resPercorsi.length==0) {
+                                                                                      res.redirect("/404");
+                                                                                      return;
+                                                                                    }
+
+                                                                                    callback(null, resPercorsi);
+                                                                                  })
+        },
+        function(callback) {
+          baDB.collection("category").aggregate([
+                                                 {
+                                                   $match:  {
+                                                              publish: true
                                                             }
                                                   },
-                                                  { $group: {
-                                                            _id:"$_id",
-                                                            title: {$first:"$title"},
-                                                            percorsi: {$push: "$percorsi"}
-                                                            }
-                                                  }
-                                      ]).toArray(function(err,resPercorsi) {
-                                                                            if(err) {
-                                                                              console.log("errore in index mongodb find: " + err);
-                                                                              //redirect errore server 500
-                                                                              res.redirect("/500");
-                                                                              return;
-                                                                            }
+                                                  { $lookup: {
+                                                                from: "percorsi",
+                                                                localField: "_id",
+                                                                foreignField: "scheda._idcategory",
+                                                                as: "percorsi"
+                                                              }
+                                                  },
+                                                  {  $project: {  "title": 1,
+                                                                  "image": 1,
+                                                                  "order":1,
+                                                                  "percorsi": {
+                                                                                $filter: {
+                                                                                           input: "$percorsi",
+                                                                                           as: "percorsi",
+                                                                                           cond: {
+                                                                                                  "$eq": ["$$percorsi.scheda.publish", true]
+                                                                                                 }
+                                                                                          }
+                                                                              }
+                                                                  }
+                                                   },
+                                                    { $unwind:"$percorsi" },
+                                                    { $sort: {
+                                                              "percorsi.scheda.publish_date": -1
+                                                              }
+                                                    },
+                                                    { $group: {
+                                                              _id:"$_id",
+                                                              title: {$first:"$title"},
+                                                              image: {$first:"$image"},
+                                                              order: {$first: "$order"},
+                                                              percorsi: {$push: "$percorsi"}
+                                                              }
+                                                    },{
+                                                       $sort: {
+                                                                "order": 1
+                                                              }
+                                                       },
+                                                    {
+                                                      $project: {
+                                                                  "_id":1,
+                                                                  "title":1,
 
-                                                                            //controllo il numero di percorsi -> 0 redirect 404
-                                                                            if (resPercorsi.length==0) {
-                                                                              res.redirect("/404");
-                                                                              return;
-                                                                            }
+                                                                 }
 
-                                                                            baDB.collection("category").aggregate([
-                                                                                                                   {
-                                                                                                                     $match:  {
-                                                                                                                                publish: true
-                                                                                                                              }
-                                                                                                                    },
-                                                                                                                    { $lookup: {
-                                                                                                                                  from: "percorsi",
-                                                                                                                                  localField: "_id",
-                                                                                                                                  foreignField: "scheda._idcategory",
-                                                                                                                                  as: "percorsi"
-                                                                                                                                }
-                                                                                                                    },
-                                                                                                                    {  $project: {  "title": 1,
-                                                                                                                                    "image": 1,
-                                                                                                                                    "order":1,
-                                                                                                                                    "percorsi": {
-                                                                                                                                                  $filter: {
-                                                                                                                                                             input: "$percorsi",
-                                                                                                                                                             as: "percorsi",
-                                                                                                                                                             cond: {
-                                                                                                                                                                    "$eq": ["$$percorsi.scheda.publish", true]
-                                                                                                                                                                   }
-                                                                                                                                                            }
-                                                                                                                                                }
-                                                                                                                                    }
-                                                                                                                     },
-                                                                                                                      { $unwind:"$percorsi" },
-                                                                                                                      { $sort: {
-                                                                                                                                "percorsi.scheda.publish_date": -1
-                                                                                                                                }
-                                                                                                                      },
-                                                                                                                      { $group: {
-                                                                                                                                _id:"$_id",
-                                                                                                                                title: {$first:"$title"},
-                                                                                                                                image: {$first:"$image"},
-                                                                                                                                order: {$first: "$order"},
-                                                                                                                                percorsi: {$push: "$percorsi"}
-                                                                                                                                }
-                                                                                                                      },{
-                                                                                                                         $sort: {
-                                                                                                                                  "order": 1
-                                                                                                                                }
-                                                                                                                         },
-                                                                                                                      {
-                                                                                                                        $project: {
-                                                                                                                                    "_id":1,
-                                                                                                                                    "title":1,
+                                                     }
+                                                ]).toArray(function(err, resCategory) {
+                                                    if(err) {
+                                                        callback(err)
+                                                    }
 
-                                                                                                                                   }
+                                                    if (resCategory.length==0) {
+                                                      resCategory = undefined;
+                                                    }
 
-                                                                                                                       }
-                                                                                                                  ]).toArray(function(err, resCategory) {
-                                                                                                                    if(err) {
-                                                                                                                      console.log("errore in index mongodb find: " + err);
-                                                                                                                      //redirect errore server 500
-                                                                                                                      res.redirect("/500");
-                                                                                                                      return;
-                                                                                                                    }
+                                                    callback(null, resCategory)
 
-                                                                                                                    //controllo il numero di percorsi -> 0 redirect 404
-                                                                                                                    if (resCategory.length==0) {
-                                                                                                                      res.redirect("/404");
-                                                                                                                      return;
-                                                                                                                    }
+                                                })
+        }
+      ], function(err,result) {
+        if(err) {
+          console.log("errore in index mongodb find: " + err);
+          //redirect errore server 500
+          res.redirect("/500");
+          return;
+        }
 
-                                                                                                                      res.render(__dirname + "/../template/category", {
-                                                                                                                          title: req.params.slag_category + " | " ,
-                                                                                                                          description: "meta descrizione categoria",
-                                                                                                                          percorsiObj: resPercorsi,
-                                                                                                                          categoryObj: resCategory
-                                                                                                                      } )
-
-
-
-                                                                                                                })
-
-
-
-                                                                          })
-
-
-
+        res.render(__dirname + "/../template/category", {
+            title: req.params.slag_category + " | " ,
+            description: "meta descrizione categoria",
+            percorsiObj: result[0],
+            categoryObj: result[1]
+        } )
+      }
+    )
 })
 
 //percorso -> output template html
@@ -246,132 +250,94 @@ app.get("/:slag_category/:slag_percorso",function(req,res) {
 //INDEX
 //app.get("/", ba.testFunctionIndex);
 app.get("/", function(req,res) {
-
-    //ESEMPIO INSERIMENTO
-    /*var myobj = { _id:"2", name: "Company Inc", address: "Highway 37" };
-
-   baDB.collection("customers").insertOne(myobj, function(err, res) {
-      if (err) {
-        console.log(err.code);
-        return;
-      };
-      console.log("1 document inserted");
-      console.log(res.insertedCount)
-      baDB.close();
-    });*/
-    /*baDB.collection("category").find({publish: true},{publish: false,order:false})
-                              .sort($and: [{order: 1}])
-                              .toArray(function(err, category) {
-                                                                     if(err) {
-                                                                       console.log("errore in index mongodb find: " + err);
-                                                                     }
-
-
-                                                                     //operazioni
-
-
-                                                                     baDB.close();
-
-
-                                                                     res.render(__dirname + "/../template/index", {
-                                                                         title: null,
-                                                                         description: "meta descrizione",
-                                                                         category: result
-                                                                     });
-                                                                   });*/
-      baDB.collection('category').aggregate([
-                                               {
-                                                 $match:  {
-                                                            publish: true
-                                                          }
-                                                },
-                                                { $lookup: {
-                                                              from: "percorsi",
-                                                              localField: "_id",
-                                                              foreignField: "scheda._idcategory",
-                                                              as: "percorsi"
-                                                            }
-                                                },
-                                                {  $project: {  "title": 1,
+  async.waterfall([
+        function(callback) {
+          baDB.collection('category').aggregate([
+                                                   {
+                                                     $match:  {
+                                                                publish: true
+                                                              }
+                                                    },
+                                                    { $lookup: {
+                                                                  from: "percorsi",
+                                                                  localField: "_id",
+                                                                  foreignField: "scheda._idcategory",
+                                                                  as: "percorsi"
+                                                                }
+                                                    },
+                                                    {  $project: {  "title": 1,
+                                                                    "image": 1,
+                                                                    "order":1,
+                                                                    "percorsi": {
+                                                                                  $filter: {
+                                                                                             input: "$percorsi",
+                                                                                             as: "percorsi",
+                                                                                             cond: {
+                                                                                                    "$eq": ["$$percorsi.scheda.publish", true]
+                                                                                                   }
+                                                                                            }
+                                                                                }
+                                                                    }
+                                                     },
+                                                      { $unwind:"$percorsi" },
+                                                      { $sort: {
+                                                                "percorsi.scheda.publish_date": -1
+                                                                }
+                                                      },
+                                                      { $group: {
+                                                                _id:"$_id",
+                                                                title: {$first:"$title"},
+                                                                image: {$first:"$image"},
+                                                                order: {$first: "$order"},
+                                                                percorsi: {$push: "$percorsi"}
+                                                                }
+                                                      },
+                                                      {  $project: {
+                                                                "title": 1,
                                                                 "image": 1,
                                                                 "order":1,
                                                                 "percorsi": {
-                                                                              $filter: {
-                                                                                         input: "$percorsi",
-                                                                                         as: "percorsi",
-                                                                                         cond: {
-                                                                                                "$eq": ["$$percorsi.scheda.publish", true]
-                                                                                               }
-                                                                                        }
-                                                                            }
+                                                                          $slice: ["$percorsi", 2]
+                                                                            },
+                                                                      }
+                                                      }, {
+                                                          $sort: {
+                                                                  "order": 1
                                                                 }
-                                                 },
-                                                  { $unwind:"$percorsi" },
-                                                  { $sort: {
-                                                            "percorsi.scheda.publish_date": -1
-                                                            }
-                                                  },
-                                                  { $group: {
-                                                            _id:"$_id",
-                                                            title: {$first:"$title"},
-                                                            image: {$first:"$image"},
-                                                            order: {$first: "$order"},
-                                                            percorsi: {$push: "$percorsi"}
-                                                            }
-                                                  },
-                                                  {  $project: {
-                                                            "title": 1,
-                                                            "image": 1,
-                                                            "order":1,
-                                                            "percorsi": {
-                                                                      $slice: ["$percorsi", 2]
-                                                                        },
-                                                                  }
-                                                  }, {
-                                                      $sort: {
-                                                              "order": 1
-                                                            }
-                                                     }
-                                                   ]).toArray(function(err,category) {
-                                                     if(err) {
-                                                       console.log("errore in index mongodb find: " + err);
-                                                       //redirect errore server 500
-                                                       res.redirect("/500");
-                                                       return
-                                                     }
-
-
-                                                  //  carico gli id da escludere negli elementi in evidenza
-                                                  var idEscludere = []
-                                                    category.forEach(function(catObj) {
-                                                        catObj['percorsi'].forEach(function percorsi(objPercorso) {
-                                                            idEscludere.push(objPercorso._id);
-
+                                                         }
+                                                       ]).toArray(function(err,category) {
+                                                         if(err) {
+                                                           callback(err)
+                                                         }
+                                                          callback(null, category)
                                                         })
+        },
+        function(category, callback) {
 
-                                                    })
+          var idEscludere = []
+            category.forEach(function(catObj) {
+                catObj['percorsi'].forEach(function percorsi(objPercorso) {
+                    idEscludere.push(objPercorso._id);
+                })
 
+            })
 
-                                                    //caricamento da db dei percorsi in evidenza
+            callback(null, category, idEscludere)
+        }
+      ], function (err, category, idEsclusi) {
+              console.log(category,idEsclusi);
+              if (err) {
+                res.redirect("/500");
+                return;
+              }
 
-
-
-                                                     res.render(__dirname + "/../template/index", {
-                                                         title: null,
-                                                         description: "meta descrizione",
-                                                         //highlightObj: highlightObj,
-                                                         categoryObj: category
-
-                                                    })
-
-
-
-                                                 });
-
-
-
-
-
+               res.render(__dirname + "/../template/index", {
+                                                            title: null,
+                                                            description: "meta descrizione",
+                                                             //highlightObj: highlightObj,
+                                                             categoryObj: category
+                                                           })
+         })
 
 
 });
