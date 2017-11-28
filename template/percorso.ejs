@@ -1,6 +1,6 @@
 <% include parziale/head %>
 
-    
+
 
       <div class="container-fluid">
         <section class="row">
@@ -29,45 +29,48 @@
         <div class="row">
           <nav class="col-sm-12">
             <ul>
-              <li><a href="">home</a> <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></li>
-              <li><a href="">livello 2</a> <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></li>
-              <li><a href="">livello 3</a></li>
+              <li><a href="/">home</a> <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></li>
+              <% if (search==true) {%>
+              <li><a href="javascript:history.go(-1)">cerca</a> <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></li>
+              <% } else { %>
+                <li><a href="/<%= percorsoObj[0]['scheda']['_idcategory'] %>"><%= percorsoObj[0]['categoria'][0]['title'] %></a> <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></li>
+              <% } %>
+              <li><%= percorsoObj[0]['scheda']['title'] %></li>
             </ul>
           </nav>
           <header class="col-sm-12">
-            <h1>Alla scoperta del centro di Verona</h1>
+            <h1><%= percorsoObj[0]['scheda']['title'] %></h1>
           </header>
         </div>
         <div class="row" id="content">
             <div class="col-sm-9">
-              <p>Scopriamo Verona in bicicletta per scoprire i monumenti e i quartieri più
-                affascinanti dimenticati anche dai cittadini veneti.
-                Durante il percorso potrete trovare osterie e trattorie come un tempo per poter
-                assaporare tutta la tradizione veronese.</p>
-              <p class="tags"><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> Relax, Città e paesi</p>
+              <p><%= percorsoObj[0]['scheda']['txt'] %></p>
+              <p class="tags"><span class="glyphicon glyphicon-tags" aria-hidden="true"></span><%= percorsoObj[0]['categoria'][0]['title'] %></p>
 
               <div class="row" id="dettagli">
                 <div class="col-sm-3">
-                    Difficoltà <span class="full"></span><span></span><span></span>
+                    Difficoltà <% for (var i=1;i<4;i++) {%><span <% if (i<=percorsoObj[0]['scheda']['difficolta']) {%>class="full"<%}; %>></span><%};%>
                 </div>
                 <div class="col-sm-3">
-                    Pendenza <strong>2%</strong>
+                    Pendenza <strong><%= percorsoObj[0]['scheda']['pendenza'] %>%</strong>
                 </div>
                 <div class="col-sm-3">
-                    Tipo di strada <strong>asfalto</strong>
+                    Tipo di strada <strong><%= percorsoObj[0]['scheda']['strada'] %></strong>
                 </div>
                 <div class="col-sm-3">
-                    Adatto ai bambini <span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+                    Adatto ai bambini <% if (percorsoObj[0]['scheda']['bambini'] == true) { %><span class="glyphicon glyphicon-ok" aria-hidden="true"></span><% }else { %> <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>   <%}%>
                 </div>
                 <div class="col-sm-3 lunghezza">
-                    <div>Lunghezza <strong>20 Km</strong></div>
+                    <div>Lunghezza <strong><%= percorsoObj[0]['scheda']['lunghezza'] %> Km</strong></div>
                 </div>
                 <div class="col-sm-3" id="tempo">
                     Tempo <strong>1:12:00</strong>
                 </div>
               </div>
 
-              <p class="note"><strong>note</strong> questa è una nota</p>
+              <% if (percorsoObj[0]['scheda']['note'] != undefined) { %>
+              <p class="note"><strong>note</strong> <%= percorsoObj[0]['scheda']['note'] %></p>
+              <% } %>
             </div>
             <aside class="col-sm-3">
               <div class="background-yellow">
@@ -96,9 +99,11 @@
                   <label for="commentType">Filtra Commenti</label> <select name="commentType" id="commentType">
                                                             <option value="-1">Tutti</option>
                                                             <option value="0">Generali</option>
-                                                            <option value="1">Tappa 1</option>
-                                                            <option value="2">Tappa 2</option>
-                                                            <option value="3">Tappa 3</option>
+                                                            <% var i = 1; percorsoObj[0]['scheda']['tappe'].forEach(function tappe(objTappe) {
+                                                                if (objTappe== true) { %>
+                                                                    <option value="<%= i%>">Tappa <%= i%></option>
+                                                            <% i++ }
+                                                              }) %>
                                                           </select>
 
               </section>
@@ -116,11 +121,13 @@
 
                 <div class="col-sm-12"><label for="typec">Tipo di commento </label><br/>
                   <select name="typec" id="typec">
-                                                            <option value="1">Generale</option>
-                                                            <option value="2">Tappa 1</option>
-                                                            <option value="3">Tappa 2</option>
-                                                            <option value="4">Tappa 3</option>
-                                                          </select>
+                                                            <option value="0">Generale</option>
+                                                            <% var i = 1; percorsoObj[0]['scheda']['tappe'].forEach(function tappe(objTappe) {
+                                                                if (objTappe== true) { %>
+                                                                    <option value="<%= i%>">Tappa <%= i%></option>
+                                                            <% i++ }
+                                                              }) %>
+                                                            </select>
                 </div>
                 <div class="col-sm-6">
                   <label for="nome">Nome </label><br/>

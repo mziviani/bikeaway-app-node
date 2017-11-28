@@ -98,7 +98,7 @@ function btnVelocita() {
 		setVelocita(velocita);
 
 		//4. imposto il cookie
-		$.cookie('velPref', velocita, { expires: 365 });
+		$.cookie('velPref', velocita, { expires: 36500 });
 
 		//5. riabilito i pulsanti
 		setTimeout(abilitaBtnPreferenze, 1500);

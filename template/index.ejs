@@ -8,19 +8,21 @@
               <h1>Scopri il veneto su 2 ruote</h1>
             </div>
             <div class="col-sm-12" id="search-field">
-              <form method="get" action="/search">
+              <form method="get" action="/cerca">
                <div id="search-field-group">
                   <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                   <input name="q" type="text" autocomplete="off" placeholder="Inserisci una parola o location" size="40" pattern=".{3,}" tabindex="1"  required />
                   <!-- suggerimenti -->
-                  <!--<div id="tips" class="border-red">
-                    <h6>Suggerimenti</h6>
+                  <% if (searchStoryObj != null) {%>
+                  <div id="tips" class="border-red" style="display:none">
+                    <h6>ultime ricerche</h6>
                     <ul>
-                      <li><a href="a" tabindex="2">suggerimento 1</a></li>
-                      <li><a href="b" tabindex="3">suggerimento 2</a></li>
-                      <li><a href="c" tabindex="4" class="background-yellow">suggerimento 3</a></li>
+                      <% searchStoryObj.forEach(function category(story) {%>
+                      <li><a href="/cerca?q=<%= story["ricerca"]%>" tabindex="2"><%= story["ricerca"]%></a></li>
+                      <% }) %>
                     </ul>
-                  </div>-->
+                  </div>
+                  <% } %>
 
                 </div>
                 <input type="submit" value="cerca percorso" tabindex="16">
@@ -65,72 +67,40 @@
           </div>
         </header>
       </section>
-      <div class="background-yellow">
-        <section class="container">
-          <section class="row" id="evidenza">
-            <header class="col-sm-12">
-              <h2>In evidenza</h2>
-            </header>
-            <section class="col-sm-4 percorso highlight" tabindex="16">
-              <a href="#">
-                <h3>La magia di Valeggio sul mincio</h3>
-                  <section>
-                    <div class="row">
-                      <div class="col-md-9"><span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span> Valeggio sul Mincio (VR)</div>
-                      <div class="lunghezza col-md-3"><strong>20 Km</strong></div>
-                    </div>
-                      <div class="row dettagli">
-                        <div class="col-md-6">Difficoltà <span class="full"></span><span></span><span></span></div>
-                        <div class="col-md-6">Tempo <strong>1:11:00</strong></div>
-                        <div class="clearfix"></div>
-                        <div class="col-md-6">Pendenza <strong>2%</strong></div>
-                        <div class="col-md-6">Strada <strong>asfalto</strong></div>
-                      </div>
-                    <p><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> Relax, Città e paesi</p>
+
+      <% if (highlightObj != null) {%>
+          <div class="background-yellow">
+              <section class="container">
+                <header class="col-sm-12">
+                  <h2>In evidenza</h2>
+                </header>
+
+                  <% highlightObj.forEach(function hightlight(hObj) {%>
+                <section class="col-sm-4 percorso highlight" tabindex="16">
+                  <a href="/<%= hObj['categoria'][0]['_id'] + '/' + hObj['_id'] %>">
+                    <h3><%= hObj['scheda']['title'] %></h3>
+                      <section>
+                        <div class="row">
+                          <div class="col-md-9"><span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span> <%= hObj['scheda']['txt_start'] %></div>
+                          <div class="lunghezza col-md-3"><strong><%= hObj['scheda']['lunghezza'] %> Km</strong></div>
+                        </div>
+                          <div class="row dettagli">
+                            <div class="col-md-6">Difficoltà <% for (var i=1;i<4;i++) {%><span <% if (i<=hObj['scheda']['difficolta']) {%>class="full"<%}; %>></span><%};%></div>
+                            <div class="col-md-6">Tempo <strong>0:00:00</strong></div>
+                            <div class="clearfix"></div>
+                            <div class="col-md-6">Pendenza <strong><%= hObj['scheda']['pendenza'] %>%</strong></div>
+                            <div class="col-md-6">Strada <strong><%= hObj['scheda']['strada'] %></strong></div>
+                          </div>
+                        <p><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> <%= hObj['categoria'][0]['title'] %></p>
+                    </section>
+                  </a>
                 </section>
-              </a>
-            </section>
-            <section class="col-sm-4 percorso highlight" tabindex="17">
-              <a href="#">
-                <h3>La magia di Valeggio sul mincio</h3>
-                  <section>
-                    <div class="row">
-                      <div class="col-md-9"><span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span> Valeggio sul Mincio (VR)</div>
-                      <div class="lunghezza col-md-3"><strong>20 Km</strong></div>
-                    </div>
-                      <div class="row dettagli">
-                        <div class="col-md-6">Difficoltà <span class="full"></span><span></span><span></span></div>
-                        <div class="col-md-6">Tempo <strong>1:11:00</strong></div>
-                        <div class="clearfix"></div>
-                        <div class="col-md-6">Pendenza <strong>2%</strong></div>
-                        <div class="col-md-6">Strada <strong>asfalto</strong></div>
-                      </div>
-                    <p><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> Relax, Città e paesi</p>
-                </section>
-              </a>
-            </section>
-            <section class="col-sm-4 percorso highlight" tabindex="18">
-              <a href="#">
-                <h3>La magia di Valeggio sul mincio</h3>
-                  <section>
-                    <div class="row">
-                      <div class="col-md-9"><span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span> Valeggio sul Mincio (VR)</div>
-                      <div class="lunghezza col-md-3"><strong>20 Km</strong></div>
-                    </div>
-                      <div class="row dettagli">
-                        <div class="col-md-6">Difficoltà <span class="full"></span><span></span><span></span></div>
-                        <div class="col-md-6">Tempo <strong>1:11:00</strong></div>
-                        <div class="clearfix"></div>
-                        <div class="col-md-6">Pendenza <strong>2%</strong></div>
-                        <div class="col-md-6">Strada <strong>asfalto</strong></div>
-                      </div>
-                    <p><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> Relax, Città e paesi</p>
-                </section>
-              </a>
-            </section>
-          </section>
-        </section>
-      </div>
+                <% }) %>
+              </section>
+          </div>
+      <% } %>
+
+
       <main class="container" id="percorsi">
         <div class="row">
           <header class="col-sm-12">
@@ -141,35 +111,35 @@
         <% categoryObj.forEach(function category(obj) {%>
             <article class="row">
               <div class="col-sm-4" tabindex="19">
-               <header  style="background-image:url('/images/<%= obj.image%>')">
+               <header  style="background-image:url('/images/<%= obj['image']%>')">
                  <a href="/<%= obj._id %>">
                    <h3><%= obj.title %></h3>
-                    <div><strong>vedi tutti</strong> i percorsi <strong><%= obj._id %></strong></div>
+                    <div><strong>vedi tutti</strong> i percorsi <strong><%= obj['_id'] %></strong></div>
                   </a>
                 </header>
               </div>
-                  <% obj['percorsi'].forEach(function percorsi(objPercorso) {%>
-                    <article class="col-sm-4 percorso" tabindex="20">
-                      <a href="/<%= objPercorso.scheda._idcategory + '/' + objPercorso._id %>">
-                        <h4><%= objPercorso.scheda.title %></h4>
-                          <section>
-                            <div class="row">
-                              <div class="col-md-9"><span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span> <%= objPercorso.scheda.txt_start %></div>
-                              <div class="lunghezza col-md-3"><strong><%= objPercorso.scheda.lunghezza %> Km</strong></div>
-                            </div>
-                              <div class="row dettagli">
-                                <div class="col-md-6">Difficoltà <% for (var i=1;i<4;i++) {%><span <% if (i<=objPercorso.scheda.difficolta) {%>class="full"<%}; %>></span><%};%></div>
-                                <div class="col-md-6">Tempo <strong>0:00:00</strong></div>
-                                <div class="clearfix"></div>
-                                <div class="col-md-6">Pendenza <strong><%= objPercorso.scheda.pendenza %>%</strong></div>
-                                <div class="col-md-6">Strada <strong><%= objPercorso.scheda.strada %></strong></div>
-                              </div>
-                            <p><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> <%= objPercorso.scheda._idcategory %></p>
-                        </section>
-                      </a>
-                    </article>
-                  <% });%>
-            </article>
+              <% obj['percorsi'].forEach(function percorsi(objPercorso) {%>
+                <article class="col-sm-4 percorso" tabindex="20">
+                  <a href="/<%= objPercorso['scheda']['_idcategory'] + '/' + objPercorso['_id'] %>">
+                    <h4><%= objPercorso['scheda']['title'] %></h4>
+                      <section>
+                        <div class="row">
+                          <div class="col-md-9"><span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span> <%= objPercorso['scheda']['txt_start'] %></div>
+                          <div class="lunghezza col-md-3"><strong><%= objPercorso['scheda']['lunghezza'] %> Km</strong></div>
+                        </div>
+                          <div class="row dettagli">
+                            <div class="col-md-6">Difficoltà <% for (var i=1;i<4;i++) {%><span <% if (i<=objPercorso['scheda']['difficolta']) {%>class="full"<%}; %>></span><%};%></div>
+                            <div class="col-md-6">Tempo <strong>0:00:00</strong></div>
+                            <div class="clearfix"></div>
+                            <div class="col-md-6">Pendenza <strong><%= objPercorso['scheda']['pendenza'] %>%</strong></div>
+                            <div class="col-md-6">Strada <strong><%= objPercorso['scheda']['strada'] %></strong></div>
+                          </div>
+                        <p><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> <%= obj['title'] %></p>
+                    </section>
+                  </a>
+                </article>
+              <% });%>
+        </article>
         <% }); %>
 
 

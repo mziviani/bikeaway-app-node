@@ -1,5 +1,5 @@
   <% include parziale/head %>
-    
+
 
         <div class="container-fluid border-red">
           <div class="row">
@@ -13,18 +13,27 @@
         <div class="row">
           <nav class="col-sm-12">
             <ul>
-              <li><a href="">home</a> <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></li>
-              <li><a href="">livello 2</a> <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></li>
-              <li><a href="">livello 3</a></li>
+              <li><a href="/">home</a> <span class="glyphicon glyphicon-menu-right" aria-hidden="true"></span></li>
+              <li>cerca "<%= query %>"</li>
             </ul>
           </nav>
           <header class="col-sm-12">
-            <h2>cerca <strong>"Verona Centro"</strong></h2>
+            <h2>cerca <strong>"<%= query %>"</strong></h2>
           </header>
         </div>
         <section class="row">
           <!--cambiare col-sm-2 col-sm-push-10-->
           <section class="col-sm-3 col-sm-push-9">
+            <!--categorie -->
+            <section id="side-search" class="background-red">
+              <h4>Cerca</h4>
+                <form action="/cerca" method="get">
+                  <input name="q" type="text" autocomplete="off"   pattern=".{3,}" tabindex="1"  required />
+                  <input type="submit" value="cerca percorso" tabindex="16">
+              </form>
+            </section>
+
+
             <section id="order" class="background-red">
               <h4>Ordinamento</h4>
               <select name="orderInput" id="orderInput"tabindex="8">
@@ -84,80 +93,44 @@
 
             </section>
 
-            <!--categorie -->
-            <section id="side-search" class="background-red">
-              <h4>Cerca</h4>
-                <form action="/search" method="get">
-                  <input name="q" type="text" autocomplete="off"   pattern=".{3,}" tabindex="1"  required />
-                  <input type="submit" value="cerca percorso" tabindex="16">
-              </form>
-            </section>
+
           </section>
 
           <!-- cambiarae in col-sm-10 -->
           <article class="col-sm-9 col-sm-pull-3">
             <div class="row">
 
+              <% if(serp==undefined) { %>
+              <div class="col-md-12">
+                <h2>La tua ricerca non ha prodotto nessun risultato</h2>
+              </div>
+              <% } else {
+                    serp.forEach(function category(percorsoObj) { %>
 
-              <article class="col-sm-6 percorso">
-                <a href="#">
-                  <h3>La magia di Valeggio sul mincio</h3>
-                    <section>
-                      <div class="row">
-                        <div class="col-md-9"><span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span> Valeggio sul Mincio (VR)</div>
-                        <div class="lunghezza col-md-3"><strong>20 Km</strong></div>
-                      </div>
-                        <div class="row dettagli">
-                          <div class="col-md-6">Difficoltà <span class="full"></span><span></span><span></span></div>
-                          <div class="col-md-6">Tempo <strong>1:11:00</strong></div>
-                          <div class="clearfix"></div>
-                          <div class="col-md-6">Pendenza <strong>2%</strong></div>
-                          <div class="col-md-6">Strada <strong>asfalto</strong></div>
-                        </div>
-                      <p><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> Relax, Città e paesi</p>
-                  </section>
-                </a>
-              </article>
-              <article class="col-sm-6  percorso">
-                <a href="#">
-                  <h3>La magia di Valeggio sul mincio</h3>
-                    <section>
-                      <div class="row">
-                        <div class="col-md-9"><span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span> Valeggio sul Mincio (VR)</div>
-                        <div class="lunghezza col-md-3"><strong>20 Km</strong></div>
-                      </div>
-                        <div class="row dettagli">
-                          <div class="col-md-6">Difficoltà <span class="full"></span><span></span><span></span></div>
-                          <div class="col-md-6">Tempo <strong>1:11:00</strong></div>
-                          <div class="clearfix"></div>
-                          <div class="col-md-6">Pendenza <strong>2%</strong></div>
-                          <div class="col-md-6">Strada <strong>asfalto</strong></div>
-                        </div>
-                      <p><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> Relax, Città e paesi</p>
-                  </section>
-                </a>
-              </article>
-              <article class="col-sm-6 percorso">
-                <a href="#">
-                  <h3>La magia di Valeggio sul mincio</h3>
-                    <section>
-                      <div class="row">
-                        <div class="col-md-9"><span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span> Valeggio sul Mincio (VR)</div>
-                        <div class="lunghezza col-md-3"><strong>20 Km</strong></div>
-                      </div>
-                        <div class="row dettagli">
-                          <div class="col-md-6">Difficoltà <span class="full"></span><span></span><span></span></div>
-                          <div class="col-md-6">Tempo <strong>1:11:00</strong></div>
-                          <div class="clearfix"></div>
-                          <div class="col-md-6">Pendenza <strong>2%</strong></div>
-                          <div class="col-md-6">Strada <strong>asfalto</strong></div>
-                        </div>
-                      <p><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> Relax, Città e paesi</p>
-                  </section>
-                </a>
-              </article>
+                      <article class="col-sm-6 percorso" data-bambini="<%= percorsoObj['scheda']['bambini'] %>" data-lan="<%= percorsoObj['coordinates'][0][0]%>" data-lon="<%= percorsoObj['coordinates'][0][1]%>" >
+                          <a href="<%= percorsoObj['scheda']['_idcategory'] + '/' + percorsoObj['_id']+ "?type=search" %>">
+                            <h3><%= percorsoObj['scheda']['title'] %></h3>
+                              <section>
+                                <div class="row">
+                                  <div class="col-md-9"><span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span> <%= percorsoObj['scheda']['txt_start'] %></div>
+                                  <div class="lunghezza col-md-3"><strong><%= percorsoObj['scheda']['lunghezza'] %> Km</strong></div>
+                                </div>
+                                  <div class="row dettagli">
+                                    <div class="col-md-6">Difficoltà <% for (var i=1;i<4;i++) {%><span <% if (i<=percorsoObj['scheda']['difficolta']) {%>class="full"<%}; %>></span><%};%></div>
+                                    <div class="col-md-6">Tempo <strong>0:00:00</strong></div>
+                                    <div class="clearfix"></div>
+                                    <div class="col-md-6">Pendenza <strong><%= percorsoObj['scheda']['pendenza'] %>%</strong></div>
+                                    <div class="col-md-6">Strada <strong><%= percorsoObj['scheda']['strada'] %></strong></div>
+                                  </div>
+                                <p><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> <%= percorsoObj['categoria'][0]['title'] %></p>
+                            </section>
+                          </a>
+                        </article>
+
+                  <% });
+               } %>
            </div>
-          </article>
+         </article>
 
         </section>
       </main>
