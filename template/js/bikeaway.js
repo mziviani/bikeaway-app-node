@@ -205,8 +205,21 @@ var lngDefault = 10.991621500000065;
 																		});
 
 																		//marker esempi chiamata ajax
-																		addMarker(mapHome,'1',45.43838419999999,10.991621500000065,0)
-																		addMarker(mapHome,'1',45.44,10.99163,0)
+																		$.getJSON('/private/api/json/all/')
+																							.done(function(data) {
+																									if(data['error']==true) {
+																										$("#map").hide()
+																										return;
+																									}
+																									$.each(data, function(key,val) {
+																										addMarkerNoLabel(mapHome,val['coordinates'][0][0],val['coordinates'][0][1],0, val['scheda'],val['categoria'][0]['title'])
+																									})
+																							})
+																							.fail(function(data) {
+																									//in caso di errore nascondo la mappa
+																									$("#map").hide()
+																							})
+
 
 
 
@@ -223,12 +236,12 @@ var lngDefault = 10.991621500000065;
 			 default:
 					 img='pinhome.png'
 			}
-			var url = 'http://localhost/html-template/images/'+img;
+			var url = 'http://localhost:8080/images/'+img;
 			return url;
 		 }
 
 
-		 function addMarker(map,label,lat,lng, type) {
+		 function addMarker(map,label,lat,lng, type, titolo, diff, strada, pendenza, cat ) {
 			 var img = pinMarker(type);
 
 			 var marker = new google.maps.Marker({
@@ -239,7 +252,7 @@ var lngDefault = 10.991621500000065;
 					 clickable: true
 				 });
 				 var infowindow = new google.maps.InfoWindow({
-    	 			content: '<h6 class="titlemap"><a href="#">I monumenti di verona</a></h6><p class="textmap">Difficoltà <span class="full"></span><span class="full"></span><span></span></p><p class="textmap">Strada <strong>Asfalto</strong></p><p class="textmap">Pendenza <strong>2%</strong></p><p class="tagsmap"><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> Relax</p>'
+    	 			content: '<h6 class="titlemap"><a href="#">'+titolo+'</a></h6><p class="textmap">Difficoltà <span class="full"></span><span class="full"></span><span></span></p><p class="textmap">Strada <strong>'+strada+'</strong></p><p class="textmap">Pendenza <strong>'+pendenza+'%</strong></p><p class="tagsmap"><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> '+cat+'</p>'
   				});
 
 				marker.addListener('click', function() {
@@ -249,7 +262,7 @@ var lngDefault = 10.991621500000065;
 
 
 		 }
-		 function addMarkerNoLabel(map,lat,lng, type) {
+		 function addMarkerNoLabel(map,lat,lng, type,scheda, cat) {
 
 			 var img = pinMarker(type);
 
@@ -259,8 +272,18 @@ var lngDefault = 10.991621500000065;
 					icon: img,
 					clickable: true
 				});
+
+			var difficoltaHTML = "";
+			for (var i = 1; i<=3;i++) {
+					if (i<=scheda['difficolta']) {
+						difficoltaHTML +="<span class=\"full\"></span>"
+					} else {
+						difficoltaHTML += "<span></span>"
+					}
+			}
+
 				var infowindow = new google.maps.InfoWindow({
-					 content: '<h6 class="titlemap"><a href="#">I monumenti di verona</a></h6><p class="textmap">Difficoltà <span class="full"></span><span class="full"></span><span></span></p><p class="textmap">Strada <strong>Asfalto</strong></p><p class="textmap">Pendenza <strong>2%</strong></p><p class="tagsmap"><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> Relax</p>'
+					content: '<h6 class="titlemap"><a href="#">'+scheda['title']+'</a></h6><p class="textmap">Lunghezza <strong>'+scheda['lunghezza']+' Km</strong></p><p class="textmap">Difficoltà '+difficoltaHTML+'</p><p class="textmap">Strada <strong>'+scheda['strada']+'</strong></p><p class="textmap">Pendenza <strong>'+scheda['pendenza']+'%</strong></p><p class="tagsmap"><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> '+cat+'</p>'
 				 });
 
 			 marker.addListener('click', function() {
@@ -490,7 +513,7 @@ function initMapScheda() {
 	var request = {
 		 origin: start,
 		 destination: end,
-		 travelMode: 'DRIVING',
+		 travelMode: 'WALKING', //DRIVING
 		 unitSystem: google.maps.UnitSystem.METRIC,
 		 waypoints: [
 								 {

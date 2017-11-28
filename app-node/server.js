@@ -30,6 +30,7 @@ app.use(express.static(__dirname + "/../template"));
 //override per rendere compatibile CRUD con i browser più vecchi per chiamate ajax
 //pag 131
 app.use("/private/api/json/:slag_percorso", methodOverride());
+app.use("/private/api/json/all", methodOverride());
 
 //set cookieParser
 app.use(cookieParser());
@@ -839,6 +840,56 @@ app.get("/", function(req,res) {
   next()
 })*/
 
+//xhr per home
+app.get("/private/api/json/all/", function(req,res) {
+  baDB.collection('percorsi').aggregate([
+                                                      {
+                                                              $match: {
+                                                                        'scheda.publish':true,
+                                                                      }
+                                                       },
+                                                       {
+                                                           $lookup: {
+                                                                      from:"category",
+                                                                      localField: "scheda._idcategory",
+                                                                      foreignField: "_id",
+                                                                      as: "categoria"
+
+                                                               }
+
+                                                        },{
+                                                         $project: {  "_id":0,
+                                                                      "coordinates": {
+                                                                                         "$slice": [ "$coordinates", 0,1]
+                                                                                      },
+                                                                      "scheda.title":1,
+                                                                      "scheda.difficolta":1,
+                                                                      "scheda.lunghezza":1,
+                                                                      "scheda.pendenza":1,
+                                                                      "scheda.strada":1,
+                                                                      "categoria": {
+                                                                                      "title":1
+                                                                                    }
+                                                                    }
+                                                      }
+                                             ]).toArray(function(err,result) {
+                                               res.header("Access-Control-Allow-Origin", "http://localhost:8080/");
+                                               res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+                                               res.setHeader('Content-Type', 'application/json');
+
+                                                if (err) {
+                                                  console.log("Errore /private/api/json/all/ ->" +err);
+                                                  res.end(JSON.stringify({error: true}));
+                                                  return
+                                                }
+
+                                                res.end(JSON.stringify(result));
+                                            });
+
+
+
+  //res.end("carica commenti di " + req.params.slag_percorso);
+})
 
 app.get("/private/api/json/:slag_percorso/", function(req,res) {
   res.end("carica commenti di " + req.params.slag_percorso);
