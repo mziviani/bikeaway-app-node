@@ -176,6 +176,10 @@ var mapHome;
 var latDefault = 45.43838419999999;
 var lngDefault = 10.991621500000065;
 
+//finestra aperta
+var infowindow = null;
+
+
 		 function initMapHome() {
 				if (navigator.geolocation) {
 				     navigator.geolocation.getCurrentPosition(setLatLngDefault, fallbackMap);
@@ -200,9 +204,27 @@ var lngDefault = 10.991621500000065;
 																			zoom: 13,
 																			streetViewControl: false,
 																			fullscreenControl: false,
-																			mapTypeControl: false
+																			mapTypeControl: false,
+																			styles: 	[
+																									   {
+																									     featureType: "poi.business",
+																									     stylers: [
+																									      { visibility: "off" }
+																									     ]
+																										 },
+																										 {
+																									     featureType: "poi.sports_complex",
+																									     stylers: [
+																									      { visibility: "off" }
+																									     ]
+																										 }
+
+																									]
 
 																		});
+
+
+
 
 																		//marker esempi chiamata ajax
 																		$.getJSON('/private/api/json/all/')
@@ -212,13 +234,15 @@ var lngDefault = 10.991621500000065;
 																										return;
 																									}
 																									$.each(data, function(key,val) {
-																										addMarkerNoLabel(mapHome,val['coordinates'][0][0],val['coordinates'][0][1],0, val['scheda'],val['categoria'][0]['title'])
+																										addMarkerNoLabel(mapHome,val['coordinates'][0][0],val['coordinates'][0][1], val['scheda'],val['categoria'][0]['title'], val['_id'],val['categoria'][0]['_id'])
 																									})
 																							})
 																							.fail(function(data) {
 																									//in caso di errore nascondo la mappa
 																									$("#map").hide()
 																							})
+
+
 
 
 
@@ -241,7 +265,8 @@ var lngDefault = 10.991621500000065;
 		 }
 
 
-		 function addMarker(map,label,lat,lng, type, titolo, diff, strada, pendenza, cat ) {
+
+		 function addMarker(map,label,lat,lng, type, titolo, diff, strada, pendenza, cat, schedaId, catId ) {
 			 var img = pinMarker(type);
 
 			 var marker = new google.maps.Marker({
@@ -251,18 +276,23 @@ var lngDefault = 10.991621500000065;
 					 icon: img,
 					 clickable: true
 				 });
-				 var infowindow = new google.maps.InfoWindow({
-    	 			content: '<h6 class="titlemap"><a href="#">'+titolo+'</a></h6><p class="textmap">Difficoltà <span class="full"></span><span class="full"></span><span></span></p><p class="textmap">Strada <strong>'+strada+'</strong></p><p class="textmap">Pendenza <strong>'+pendenza+'%</strong></p><p class="tagsmap"><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> '+cat+'</p>'
+				  infowindow = new google.maps.InfoWindow({
+    	 			content: '<h6 class="titlemap"><a href="/'+catId+'/'+schedaId+'">'+titolo+'</a></h6><p class="textmap">Difficoltà <span class="full"></span><span class="full"></span><span></span></p><p class="textmap">Strada <strong>'+strada+'</strong></p><p class="textmap">Pendenza <strong>'+pendenza+'%</strong></p><p class="tagsmap"><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> '+cat+'</p>'
   				});
 
 				marker.addListener('click', function() {
+																			//chiudo eventuali finestre aperte
+																					 if (infowindow) {
+																						 infowindow.close();
+																					}
 	    														infowindow.open(map, marker);
 	  														});
 
 
 
 		 }
-		 function addMarkerNoLabel(map,lat,lng, type,scheda, cat) {
+		 function addMarkerNoLabel(map,lat,lng,scheda, titleCat,schedaId, catId) {
+
 
 			 var img = pinMarker(type);
 
@@ -281,12 +311,16 @@ var lngDefault = 10.991621500000065;
 						difficoltaHTML += "<span></span>"
 					}
 			}
-
-				var infowindow = new google.maps.InfoWindow({
-					content: '<h6 class="titlemap"><a href="#">'+scheda['title']+'</a></h6><p class="textmap">Lunghezza <strong>'+scheda['lunghezza']+' Km</strong></p><p class="textmap">Difficoltà '+difficoltaHTML+'</p><p class="textmap">Strada <strong>'+scheda['strada']+'</strong></p><p class="textmap">Pendenza <strong>'+scheda['pendenza']+'%</strong></p><p class="tagsmap"><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> '+cat+'</p>'
+				 infowindow = new google.maps.InfoWindow({
+					content: '<h6 class="titlemap"><a href="/'+catId+'/'+schedaId+'">'+scheda['title']+'</a></h6><p class="textmap">Lunghezza <strong>'+scheda['lunghezza']+' Km</strong></p><p class="textmap">Difficoltà '+difficoltaHTML+'</p><p class="textmap">Strada <strong>'+scheda['strada']+'</strong></p><p class="textmap">Pendenza <strong>'+scheda['pendenza']+'%</strong></p><p class="tagsmap"><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> '+titleCat+'</p>'
 				 });
 
 			 marker.addListener('click', function() {
+																			 //chiudo eventuali finestre aperte
+																						if (infowindow) {
+																							infowindow.close();
+																					 }
+
 																 infowindow.open(map, marker);
 															 });
 
@@ -300,20 +334,63 @@ var lngDefault = 10.991621500000065;
 
 		 /********* category map *****/
 		 function initMapCategory() {
+			 var idcategory = window.location.pathname;
+			 idcategory = idcategory.replace("/","");
+
 
 			 mapHome = new google.maps.Map(document.getElementById('map'), {
 																		 center: {lat: latDefault, lng: lngDefault},
 																		 zoom: 12,
 																		 streetViewControl: false,
 																		 fullscreenControl: false,
-																		 mapTypeControl: false
+																		 mapTypeControl: false,
+																		 styles: 	[
+																										{
+																											featureType: "poi.business",
+																											stylers: [
+																											 { visibility: "off" }
+																											]
+																										},
+																										{
+																											featureType: "poi.sports_complex",
+																											stylers: [
+																											 { visibility: "off" }
+																											]
+																										}
+
+																								 ]
 
 																	 });
 
 
+																	 $.getJSON('/private/api/json/category/'+idcategory)
+																						 .done(function(data) {
+
+																								 if(data['error']==true) {
+																									 $("#map").hide()
+																									 return;
+																								 }
+
+																								 $.each(data, function(key,val) {
+																									 addMarkerNoLabel(mapHome,val['coordinates'][0][0],val['coordinates'][0][1], val['scheda'],val['categoria'][0]['title'], val['_id'],val['categoria'][0]['_id'])
+																								 })
+
+
+																								 //var bounds = new google.maps.LatLngBounds();
+
+																								 $.each(data, function(key,val) {
+																									 //bounds.extend(new google.maps.LatLng(val['coordinates'][0][0],val['coordinates'][0][1]);
+																								 })
+																								// mapHome.fitBounds(bounds);
+
+																						 })
+																						 .fail(function(data) {
+																								 //in caso di errore nascondo la mappa
+																								 $("#map").hide()
+																						 })
 
 																	//test
-																	 addMarkerNoLabel(mapHome,45.43838419999999,10.991621500000065,0)
+																	/* addMarkerNoLabel(mapHome,45.43838419999999,10.991621500000065,0)
 																	 addMarkerNoLabel(mapHome,44.5,10.99163,0)
 																	 addMarkerNoLabel(mapHome,45.42,9.98,0)
 																	 addMarkerNoLabel(mapHome,45.5,11,0)
@@ -330,7 +407,7 @@ var lngDefault = 10.991621500000065;
 																		bounds.extend(new google.maps.LatLng(45.6, 10.8));
 																		bounds.extend(new google.maps.LatLng(45.3, 12));
 																		bounds.extend(new google.maps.LatLng(48, 12));
-																		mapHome.fitBounds(bounds);
+																		mapHome.fitBounds(bounds);*/
 
 		 }
 
@@ -493,7 +570,22 @@ function initMapScheda() {
 																zoom: 12,
 																streetViewControl: false,
 																fullscreenControl: false,
-																mapTypeControl: false
+																mapTypeControl: false,
+																styles: 	[
+																							 {
+																								 featureType: "poi.business",
+																								 stylers: [
+																									{ visibility: "off" }
+																								 ]
+																							 },
+																							 {
+																								 featureType: "poi.sports_complex",
+																								 stylers: [
+																									{ visibility: "off" }
+																								 ]
+																							 }
+
+																						]
 
 															});
 	//layer bici

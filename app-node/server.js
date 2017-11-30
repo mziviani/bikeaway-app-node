@@ -546,17 +546,20 @@ app.get("/", function(req,res) {
                  {$limit:5}
             ]).toArray(function(err,userKeyword) {
 
+
                 if(err || userKeyword.length==0) {
-                  //non ci sono keyword utente
+                //non ci sono keyword utente
                   callback(null,null,idEscludere,category)
                   return
                 }
+
 
                 //estrapolo le keyword
                 var userKeywordArray = []
                   userKeyword.forEach(function(keyObj) {
                           userKeywordArray.push(keyObj['_id']);
                   })
+
 
                 //ritorno le k eyword utente
                 callback(null,userKeywordArray,idEscludere,category)
@@ -569,6 +572,7 @@ app.get("/", function(req,res) {
 
           //controllo se esistono keyword utente
           if (userKeyword == null) {
+
             //err, risultato percorsi, idEscludere, category
             callback(null,null, idEscludere, category)
             return
@@ -600,12 +604,16 @@ app.get("/", function(req,res) {
 
                                                   ]).toArray(function(err,hightlight) {
 
+
                                                     //se errore o se ritorna 0
                                                     if (err || hightlight.length == 0 ) {
+
+
                                                       //err, risultato percorsi, idEscludere, category
                                                       callback(null,null, idEscludere, category)
                                                       return
                                                     }
+
 
 
                                                     //aggiorno gli id da idEscludere
@@ -668,16 +676,24 @@ app.get("/", function(req,res) {
         },
         function(allUserKeyword, hightlight,idEscludere,category,callback) {
           var limiteQuery = 3
+          var allUserKeywordN = 0
+          if (allUserKeyword != null) {
+            allUserKeywordN = allUserKeyword.length
+          }
           //4. controllo che gli hightlight tornati sono 3 in caso carico gli altri percorsi
           // 3-> exit <3 chiamare percorsi con keyword più ricercate da tutti gli utenti
           if (hightlight != null) {
-              if(hightlight.length==3 || allUserKeyword.length==0) {
+              if(hightlight.length==3 || allUserKeywordN.length==0) {
+
                 callback(null,hightlight,idEscludere,category)
                 return
               } else {
+
                 limiteQuery = 3-hightlight.length
               }
           }
+
+
           //manca l'esclusione degli id
           //carico i percorsi con le keyword
           baDB.collection('percorsi').aggregate([
@@ -702,15 +718,21 @@ app.get("/", function(req,res) {
                                                     { $limit : limiteQuery }
 
                                       ]).toArray(function(err,result) {
+
                                           if (err || result.length==0) {
+
                                             callback(null,hightlight,idEscludere,category)
                                             return
                                           }
 
                                           //aggiungo il risultato a hightlith
                                           if (hightlight != null) {
-                                            hightlight.push(result)
+
+                                            result.forEach(function(ele) {
+                                              hightlight.push(ele)
+                                            })
                                           } else {
+
                                             hightlight = result
                                           }
 
@@ -743,7 +765,7 @@ app.get("/", function(req,res) {
                                                   {
                                                           $match: {
                                                                     'scheda.publish':true,
-                                                                    '_id': { $nin: idEscludere}
+                                                                    //'_id': { $nin: idEscludere}
 
                                                                   }
                                                    },
@@ -772,8 +794,9 @@ app.get("/", function(req,res) {
 
                                           if (result.length>0 && hightlight != null) {
                                             //console.log("result > 0 ma non nullo");
-
-                                            hightlight.push(result)
+                                            result.forEach(function(ele) {
+                                              hightlight.push(ele)
+                                            })
                                           } else if (result.length>0 && hightlight == null) {
 
                                             //console.log("hightlight = result");
@@ -812,6 +835,7 @@ app.get("/", function(req,res) {
                                           })
         }
       ], function (err, hightlight, category, searchStory) {
+
               if (err) {
                 res.redirect("/500");
                 return;
@@ -858,7 +882,7 @@ app.get("/private/api/json/all/", function(req,res) {
                                                                }
 
                                                         },{
-                                                         $project: {  "_id":0,
+                                                         $project: {  "_id":1,
                                                                       "coordinates": {
                                                                                          "$slice": [ "$coordinates", 0,1]
                                                                                       },
@@ -868,8 +892,10 @@ app.get("/private/api/json/all/", function(req,res) {
                                                                       "scheda.pendenza":1,
                                                                       "scheda.strada":1,
                                                                       "categoria": {
-                                                                                      "title":1
+                                                                                      "title":1,
+                                                                                      "_id":1
                                                                                     }
+
                                                                     }
                                                       }
                                              ]).toArray(function(err,result) {
@@ -888,18 +914,72 @@ app.get("/private/api/json/all/", function(req,res) {
 
 
 
-  //res.end("carica commenti di " + req.params.slag_percorso);
 })
 
-app.get("/private/api/json/:slag_percorso/", function(req,res) {
+//json per caricare tutti i percorsi di una categoria
+app.get("/private/api/json/category/:slag_category", function(req,res) {
+  var idCategory = req.params.slag_category
+  baDB.collection('percorsi').aggregate([
+                                                      {
+                                                              $match: {
+                                                                        'scheda.publish':true,
+                                                                      }
+                                                       },
+                                                       {
+                                                           $lookup: {
+                                                                      from:"category",
+                                                                      localField: "scheda._idcategory",
+                                                                      foreignField: "_id",
+                                                                      as: "categoria"
+
+                                                               }
+
+                                                        },{
+                                                         $project: {  "_id":1,
+                                                                      "coordinates": {
+                                                                                         "$slice": [ "$coordinates", 0,1]
+                                                                                      },
+                                                                      "scheda.title":1,
+                                                                      "scheda.difficolta":1,
+                                                                      "scheda.lunghezza":1,
+                                                                      "scheda.pendenza":1,
+                                                                      "scheda.strada":1,
+                                                                      "categoria": {
+                                                                                      "title":1,
+                                                                                      "_id":1
+                                                                                    }
+
+                                                                    }
+
+                                                      },
+                                                      {
+                                                              $match: {
+                                                                        'categoria._id':idCategory
+                                                                      }
+                                                       },
+                                             ]).toArray(function(err,result) {
+                                               res.header("Access-Control-Allow-Origin", "http://localhost:8080/");
+                                               res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+                                               res.setHeader('Content-Type', 'application/json');
+
+                                                if (err || result.lenght==0) {
+                                                  console.log("Errore /private/api/json/all/ ->" +err);
+                                                  res.end(JSON.stringify({error: true}));
+                                                  return
+                                                }
+
+                                                res.end(JSON.stringify(result));
+                                            });
+
+})
+
+//json per caricare tutti i percorsi di una categoria
+app.get("/private/api/json/track/:slag_percorso/", function(req,res) {
   res.end("carica commenti di " + req.params.slag_percorso);
 })
 
 
-//commenti -> pubblicazione commento -> return true | false
-app.put("/private/api/json/:slag_percorso/", function(req,res) {
-    res.end("pubblica commento per il percorso " + req.param.slag_percorso )
-})
+
 
 //in caso di URI non definiti -> redirect con errore 404
 app.get("*", function(req,res) {
@@ -917,7 +997,8 @@ app.get("*", function(req,res) {
 // api mailchimp
 // api akismet
 // sistemare filtering con javascript
-//api
+// ricentrare la mappa quando si riduce per cellulare
+//sistemre il filtro della scheda sul cellulare
 
 
 app.listen(8080);

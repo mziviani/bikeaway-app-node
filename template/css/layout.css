@@ -477,10 +477,20 @@ body {
   font-size: 15px;
   color: #ffc752;
 }
-#search-category input[type='text'],
-#search-category select {
+#search-category input[type='text'] {
   width: 100%;
   text-align: right;
+  color: #000;
+  margin-bottom: 8px;
+  padding: 0px;
+  border-radius: 0px;
+  background-color: #fff;
+  border-style: none;
+  border-width: 0px;
+}
+#search-category select {
+  width: 100%;
+  text-align: left;
   color: #000;
   margin-bottom: 8px;
   padding: 0px;
@@ -558,6 +568,10 @@ body {
 #scheda #content p.note,
 #scheda #content #dettagli {
   font-size: 13px;
+}
+#scheda #content p.note a {
+  color: #9d0029;
+  text-decoration: underline;
 }
 #scheda #content p.tags span {
   color: #9d0029;

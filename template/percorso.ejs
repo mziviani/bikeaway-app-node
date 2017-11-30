@@ -69,7 +69,7 @@
               </div>
 
               <% if (percorsoObj[0]['scheda']['note'] != undefined) { %>
-              <p class="note"><strong>note</strong> <%= percorsoObj[0]['scheda']['note'] %></p>
+              <p class="note"><strong>note</strong><br/> <%- percorsoObj[0]['scheda']['note'] %></p>
               <% } %>
             </div>
             <aside class="col-sm-3">
@@ -100,7 +100,7 @@
                                                             <option value="-1">Tutti</option>
                                                             <option value="0">Generali</option>
                                                             <% var i = 1; percorsoObj[0]['scheda']['tappe'].forEach(function tappe(objTappe) {
-                                                                if (objTappe== true) { %>
+                                                                if (objTappe[0]== true) { %>
                                                                     <option value="<%= i%>">Tappa <%= i%></option>
                                                             <% i++ }
                                                               }) %>
