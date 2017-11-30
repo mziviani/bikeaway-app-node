@@ -503,7 +503,6 @@ app.get("/", function(req,res) {
                 })
 
             })
-
             callback(null, category, idEscludere)
         },
         function (category, idEscludere, callback) {
@@ -765,7 +764,7 @@ app.get("/", function(req,res) {
                                                   {
                                                           $match: {
                                                                     'scheda.publish':true,
-                                                                    //'_id': { $nin: idEscludere}
+                                                                    '_id': { $nin: idEscludere}
 
                                                                   }
                                                    },

@@ -177,7 +177,7 @@ var latDefault = 45.43838419999999;
 var lngDefault = 10.991621500000065;
 
 //finestra aperta
-var infowindow = null;
+var infoWindowOpen = null;
 
 
 		 function initMapHome() {
@@ -236,6 +236,8 @@ var infowindow = null;
 																									$.each(data, function(key,val) {
 																										addMarkerNoLabel(mapHome,val['coordinates'][0][0],val['coordinates'][0][1], val['scheda'],val['categoria'][0]['title'], val['_id'],val['categoria'][0]['_id'])
 																									})
+
+
 																							})
 																							.fail(function(data) {
 																									//in caso di errore nascondo la mappa
@@ -265,7 +267,6 @@ var infowindow = null;
 		 }
 
 
-
 		 function addMarker(map,label,lat,lng, type, titolo, diff, strada, pendenza, cat, schedaId, catId ) {
 			 var img = pinMarker(type);
 
@@ -280,14 +281,14 @@ var infowindow = null;
     	 			content: '<h6 class="titlemap"><a href="/'+catId+'/'+schedaId+'">'+titolo+'</a></h6><p class="textmap">Difficoltà <span class="full"></span><span class="full"></span><span></span></p><p class="textmap">Strada <strong>'+strada+'</strong></p><p class="textmap">Pendenza <strong>'+pendenza+'%</strong></p><p class="tagsmap"><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> '+cat+'</p>'
   				});
 
-				marker.addListener('click', function() {
-																			//chiudo eventuali finestre aperte
-																					 if (infowindow) {
-																						 infowindow.close();
-																					}
-	    														infowindow.open(map, marker);
-	  														});
-
+					marker.addListener('click', function() {
+ 																				 //chiudo eventuali finestre aperte
+ 																							if (infoWindowOpen) {
+ 																								infoWindowOpen.close();
+ 																						 }
+ 																	 infowindow.open(map, marker);
+ 																	 infoWindowOpen = infowindow;
+ 																 });
 
 
 		 }
@@ -311,17 +312,17 @@ var infowindow = null;
 						difficoltaHTML += "<span></span>"
 					}
 			}
-				 infowindow = new google.maps.InfoWindow({
+				var infowindow = new google.maps.InfoWindow({
 					content: '<h6 class="titlemap"><a href="/'+catId+'/'+schedaId+'">'+scheda['title']+'</a></h6><p class="textmap">Lunghezza <strong>'+scheda['lunghezza']+' Km</strong></p><p class="textmap">Difficoltà '+difficoltaHTML+'</p><p class="textmap">Strada <strong>'+scheda['strada']+'</strong></p><p class="textmap">Pendenza <strong>'+scheda['pendenza']+'%</strong></p><p class="tagsmap"><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> '+titleCat+'</p>'
 				 });
 
 			 marker.addListener('click', function() {
 																			 //chiudo eventuali finestre aperte
-																						if (infowindow) {
-																							infowindow.close();
+																						if (infoWindowOpen) {
+																							infoWindowOpen.close();
 																					 }
-
 																 infowindow.open(map, marker);
+																 infoWindowOpen = infowindow;
 															 });
 
 
@@ -371,17 +372,17 @@ var infowindow = null;
 																									 return;
 																								 }
 
+																								 var bounds = new google.maps.LatLngBounds();
+
+
 																								 $.each(data, function(key,val) {
 																									 addMarkerNoLabel(mapHome,val['coordinates'][0][0],val['coordinates'][0][1], val['scheda'],val['categoria'][0]['title'], val['_id'],val['categoria'][0]['_id'])
+																									 bounds.extend(new google.maps.LatLng(val['coordinates'][0][0],val['coordinates'][0][1]));
+
 																								 })
 
-
-																								 //var bounds = new google.maps.LatLngBounds();
-
-																								 $.each(data, function(key,val) {
-																									 //bounds.extend(new google.maps.LatLng(val['coordinates'][0][0],val['coordinates'][0][1]);
-																								 })
-																								// mapHome.fitBounds(bounds);
+																								 //autozoom mappa
+																								 mapHome.fitBounds(bounds);
 
 																						 })
 																						 .fail(function(data) {
