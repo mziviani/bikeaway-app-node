@@ -233,9 +233,16 @@ var infoWindowOpen = null;
 																										$("#map").hide()
 																										return;
 																									}
+																									var bounds = new google.maps.LatLngBounds();
+
 																									$.each(data, function(key,val) {
 																										addMarkerNoLabel(mapHome,val['coordinates'][0][0],val['coordinates'][0][1], val['scheda'],val['categoria'][0]['title'], val['_id'],val['categoria'][0]['_id'])
+																										bounds.extend(new google.maps.LatLng(val['coordinates'][0][0],val['coordinates'][0][1]));
 																									})
+
+																									//autozoom mappa
+ 																								 //mapHome.fitBounds(bounds);
+
 
 
 																							})
@@ -390,25 +397,7 @@ var infoWindowOpen = null;
 																								 $("#map").hide()
 																						 })
 
-																	//test
-																	/* addMarkerNoLabel(mapHome,45.43838419999999,10.991621500000065,0)
-																	 addMarkerNoLabel(mapHome,44.5,10.99163,0)
-																	 addMarkerNoLabel(mapHome,45.42,9.98,0)
-																	 addMarkerNoLabel(mapHome,45.5,11,0)
-																	 addMarkerNoLabel(mapHome,45.6,10.8,0)
-																	 addMarkerNoLabel(mapHome,45.3,12,0)
-																	addMarkerNoLabel(mapHome,48,12,0)
 
-																		var bounds = new google.maps.LatLngBounds();
-
-																		bounds.extend(new google.maps.LatLng(45.43838419999999, 10.991621500000065));
-																		bounds.extend(new google.maps.LatLng(44.5, 10.99163));
-																		bounds.extend(new google.maps.LatLng(45.42, 9.98));
-																		bounds.extend(new google.maps.LatLng(45.5, 11));
-																		bounds.extend(new google.maps.LatLng(45.6, 10.8));
-																		bounds.extend(new google.maps.LatLng(45.3, 12));
-																		bounds.extend(new google.maps.LatLng(48, 12));
-																		mapHome.fitBounds(bounds);*/
 
 		 }
 
