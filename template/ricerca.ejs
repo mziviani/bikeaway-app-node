@@ -29,14 +29,14 @@
               <h4>Cerca</h4>
                 <form action="/cerca" method="get">
                   <input name="q" type="text" autocomplete="off"   pattern=".{3,}" tabindex="1"  required />
-                  <input type="submit" value="cerca percorso" tabindex="16">
+                  <input type="submit" value="cerca percorso" tabindex="2">
               </form>
             </section>
 
 
             <section id="order" class="background-red">
               <h4>Ordinamento</h4>
-              <select name="orderInput" id="orderInput"tabindex="8">
+              <select name="orderInput" id="orderInput" tabindex="3">
                                                       <option value="0">Alfabetico Crescente</option>
                                                       <option value="1">Alfabetico Decrescente</option>
                                                       <option value="2">Distanza Crescente</option>
@@ -55,19 +55,19 @@
                       <label for="lung">lunghezza max.</label>
                     </div>
                     <div class="col-md-4 col-sm-12">
-                      <input type="text" name="lung" id="lung" tabindex="6" placeholder="Km" pattern="[0-9]+{0,3}" maxlength="3"/><br/>
+                      <input type="text" name="lung" id="lung" tabindex="4" placeholder="Km" pattern="[0-9]+{0,3}" maxlength="3"/><br/>
                     </div>
                     <div class="col-md-8 col-sm-12">
                       <label for="pend">pendenza max.</label>
                     </div>
                     <div class="col-md-4 col-sm-12">
-                      <input type="text" name="pend" id="pend" tabindex="7" placeholder="%" pattern="[0-9]+{0,3}" maxlength="3"  /><br/>
+                      <input type="text" name="pend" id="pend" tabindex="5" placeholder="%" pattern="[0-9]+{0,3}" maxlength="3"  /><br/>
                     </div>
                     <div class="col-md-8 col-sm-12">
                       <label for="type">tipo di strada</label>
                     </div>
                     <div class="col-md-4 col-sm-12">
-                      <select name="type" id="type" tabindex="8">
+                      <select name="type" id="type" tabindex="6">
                                                               <option value="0">tutte</option>
                                                               <option value="1">asfalto</option>
                                                               <option value="2">terra</option>
@@ -79,7 +79,7 @@
                       <label for="diff">difficoltà</label>
                     </div>
                     <div class="col-md-4 col-sm-12">
-                        <select id="diff" name="diff" tabindex="9">
+                        <select id="diff" name="diff" tabindex="7">
                                                               <option value="0">tutte</option>
                                                               <option value="1">*</option>
                                                               <option value="2">**</option>
@@ -87,9 +87,9 @@
                                                             </select>
                     </div>
                 </div>
-              <label><input type="checkbox" name="bambini" value="1" tabindex="10" />vicino a me</label><br />
-              <label><input type="checkbox" name="vicino" value="1" tabindex="11"  />adatto ai bambini</label>
-                <button type="button">applica</button>
+              <label><input type="checkbox" name="bambini" value="1" tabindex="8" />vicino a me</label><br />
+              <label><input type="checkbox" name="vicino" value="1" tabindex="9"  />adatto ai bambini</label>
+                <button type="button" tabindex="10">applica</button>
 
             </section>
 
@@ -100,7 +100,7 @@
           <article class="col-sm-9 col-sm-pull-3">
             <div class="row">
 
-              <% if(serp==undefined) { %>
+              <% var tabindex=11;if(serp==undefined) { %>
               <div class="col-md-12">
                 <h2>La tua ricerca non ha prodotto nessun risultato</h2>
               </div>
@@ -108,7 +108,7 @@
                     serp.forEach(function category(percorsoObj) { %>
 
                       <article class="col-sm-6 percorso" data-bambini="<%= percorsoObj['scheda']['bambini'] %>" data-lan="<%= percorsoObj['coordinates'][0][0]%>" data-lon="<%= percorsoObj['coordinates'][0][1]%>" >
-                          <a href="<%= percorsoObj['scheda']['_idcategory'] + '/' + percorsoObj['_id']+ "?type=search" %>">
+                          <a href="<%= percorsoObj['scheda']['_idcategory'] + '/' + percorsoObj['_id']+ "?type=search" %>" tabindex="<%= tabindex %>">
                             <h3><%= percorsoObj['scheda']['title'] %></h3>
                               <section>
                                 <div class="row">
@@ -127,7 +127,7 @@
                           </a>
                         </article>
 
-                  <% });
+                  <% tabindex++; });
                } %>
            </div>
          </article>

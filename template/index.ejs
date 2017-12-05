@@ -13,7 +13,7 @@
                   <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
                   <input name="q" type="text" autocomplete="off" placeholder="Inserisci una parola o location" size="40" pattern=".{3,}" tabindex="1"  required />
                   <!-- suggerimenti -->
-                  <% if (searchStoryObj != null) {%>
+                <!--  <% if (searchStoryObj != null) {%>
                   <div id="tips" class="border-red" style="display:none">
                     <h6>ultime ricerche</h6>
                     <ul>
@@ -22,7 +22,7 @@
                       <% }) %>
                     </ul>
                   </div>
-                  <% } %>
+                  <% } %>-->
 
                 </div>
                 <input type="submit" value="cerca percorso" tabindex="16">
@@ -54,10 +54,10 @@
                         </div>
                         <div class="col-sm-4 col-sm-pull-0 col-xs-6 col-xs-pull-6">
                           <h6>Categorie</h6>
-                          <label><input type="checkbox" name="cat" value="family-slug" tabindex="12" /> family</label><br />
-                          <label><input type="checkbox" name="cat" value="sports-slug" tabindex="13"  /> sports</label><br/>
-                          <label><input type="checkbox" name="cat" value="relax-slug" tabindex="14"  /> relax</label><br/>
-                          <label><input type="checkbox" name="cat" value="cittaepaesi-slug" tabindex="15"  /> città e paesi</label>
+                          <% var tabindex = 12; categoryObj.forEach(function category(obj) {%>
+                          <label><input type="checkbox" name="cat" value="<%=obj._id%>" tabindex="<%= tabindex %>" /> <%=obj.title%></label><br />
+                          <% tabindex++ }) %>
+
                         </div>
                     </div>
                     <!-- fine search -->
@@ -76,8 +76,8 @@
                 </header>
 
                   <% highlightObj.forEach(function hightlight(hObj) {%>
-                <section class="col-sm-4 percorso highlight" tabindex="16">
-                  <a href="/<%= hObj['categoria'][0]['_id'] + '/' + hObj['_id'] %>">
+                <section class="col-sm-4 percorso highlight">
+                  <a href="/<%= hObj['categoria'][0]['_id'] + '/' + hObj['_id'] %>"  tabindex="<%= tabindex %>">
                     <h3><%= hObj['scheda']['title'] %></h3>
                       <section>
                         <div class="row">
@@ -95,7 +95,7 @@
                     </section>
                   </a>
                 </section>
-                <% }) %>
+                <% tabindex++ });  %>
               </section>
           </div>
       <% } %>
@@ -110,17 +110,17 @@
 
         <% categoryObj.forEach(function category(obj) {%>
             <article class="row">
-              <div class="col-sm-4" tabindex="19">
+              <div class="col-sm-4" >
                <header  style="background-image:url('/images/<%= obj['image']%>')">
-                 <a href="/<%= obj._id %>">
+                 <a href="/<%= obj._id %>" tabindex="<%= tabindex %>">
                    <h3><%= obj.title %></h3>
                     <div><strong>vedi tutti</strong> i percorsi <strong><%= obj['_id'] %></strong></div>
                   </a>
                 </header>
               </div>
-              <% obj['percorsi'].forEach(function percorsi(objPercorso) {%>
-                <article class="col-sm-4 percorso" tabindex="20">
-                  <a href="/<%= objPercorso['scheda']['_idcategory'] + '/' + objPercorso['_id'] %>">
+              <% tabindex++; obj['percorsi'].forEach(function percorsi(objPercorso) {%>
+                <article class="col-sm-4 percorso" >
+                  <a href="/<%= objPercorso['scheda']['_idcategory'] + '/' + objPercorso['_id'] %>" tabindex="<%= tabindex %>">
                     <h4><%= objPercorso['scheda']['title'] %></h4>
                       <section>
                         <div class="row">
@@ -138,9 +138,9 @@
                     </section>
                   </a>
                 </article>
-              <% });%>
+              <% tabindex++ });%>
         </article>
-        <% }); %>
+        <%  }); %>
 
 
         <!-- pubblicità -->

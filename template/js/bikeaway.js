@@ -179,6 +179,8 @@ var lngDefault = 10.991621500000065;
 //finestra aperta
 var infoWindowOpen = null;
 
+//memorizzare il centro della mappa per il resize;
+var centroMappa = null;
 
 		 function initMapHome() {
 				if (navigator.geolocation) {
@@ -241,9 +243,13 @@ var infoWindowOpen = null;
 																									})
 
 																									//autozoom mappa
- 																								 //mapHome.fitBounds(bounds);
+ 																								 mapHome.fitBounds(bounds);
 
+																								 //mermorizzo il centro della centroMappa
+																								 centroMappa = mapHome.getCenter();
 
+																								 //imposto lazione di ricentraggio della mappa in caso di resize
+																								addEventCentroMappa()
 
 																							})
 																							.fail(function(data) {
@@ -274,18 +280,22 @@ var infoWindowOpen = null;
 		 }
 
 
-		 function addMarker(map,label,lat,lng, type, titolo, diff, strada, pendenza, cat, schedaId, catId ) {
+		 function addMarker(map,lat,lng,nometappa, type,n) {
 			 var img = pinMarker(type);
+
 
 			 var marker = new google.maps.Marker({
 					 position: {lat: lat, lng: lng},
 					 map: map,
-					 label: {text:label, color:'white'},
+					 label: {text: " ", color:'white'},
 					 icon: img,
 					 clickable: true
 				 });
-				  infowindow = new google.maps.InfoWindow({
-    	 			content: '<h6 class="titlemap"><a href="/'+catId+'/'+schedaId+'">'+titolo+'</a></h6><p class="textmap">Difficoltà <span class="full"></span><span class="full"></span><span></span></p><p class="textmap">Strada <strong>'+strada+'</strong></p><p class="textmap">Pendenza <strong>'+pendenza+'%</strong></p><p class="tagsmap"><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> '+cat+'</p>'
+
+				 marker.label.text = n
+
+				 var infowindow = new google.maps.InfoWindow({
+						content: '<h6 class="titlemap">'+nometappa+'</h6>'
   				});
 
 					marker.addListener('click', function() {
@@ -320,7 +330,7 @@ var infoWindowOpen = null;
 					}
 			}
 				var infowindow = new google.maps.InfoWindow({
-					content: '<h6 class="titlemap"><a href="/'+catId+'/'+schedaId+'">'+scheda['title']+'</a></h6><p class="textmap">Lunghezza <strong>'+scheda['lunghezza']+' Km</strong></p><p class="textmap">Difficoltà '+difficoltaHTML+'</p><p class="textmap">Strada <strong>'+scheda['strada']+'</strong></p><p class="textmap">Pendenza <strong>'+scheda['pendenza']+'%</strong></p><p class="tagsmap"><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> '+titleCat+'</p>'
+					content: '<h6 class="titlemap"><a href="/'+catId+'/'+schedaId+'">'+scheda['title']+'</a></h6><p class="textmap">Lunghezza <strong>'+scheda['lunghezza']+' Km</strong></p><p class="textmap">Difficoltà '+difficoltaHTML+'</p><p class="textmap">Strada <strong>'+scheda['strada']+'</strong></p><p class="textmap">Pendenza <strong>'+scheda['pendenza']+'%</strong></p><p class="tagsmap"><a href="/'+ catId+'"><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> '+titleCat+'</a></p>'
 				 });
 
 			 marker.addListener('click', function() {
@@ -342,13 +352,20 @@ var infoWindowOpen = null;
 
 		 /********* category map *****/
 		 function initMapCategory() {
-			 var idcategory = window.location.pathname;
+			var idcategory = window.location.pathname;
+			var search = window.location.search;
 			 idcategory = idcategory.replace("/","");
+
+			 var url = '/private/api/json/category/'+idcategory
+
+			 if(idcategory == "cerca") {
+				 	url = "/private/api/json/cerca/"+search
+			 }
 
 
 			 mapHome = new google.maps.Map(document.getElementById('map'), {
 																		 center: {lat: latDefault, lng: lngDefault},
-																		 zoom: 12,
+																		 zoom: 15,
 																		 streetViewControl: false,
 																		 fullscreenControl: false,
 																		 mapTypeControl: false,
@@ -371,7 +388,7 @@ var infoWindowOpen = null;
 																	 });
 
 
-																	 $.getJSON('/private/api/json/category/'+idcategory)
+																	 $.getJSON(url)
 																						 .done(function(data) {
 
 																								 if(data['error']==true) {
@@ -388,8 +405,18 @@ var infoWindowOpen = null;
 
 																								 })
 
+																								 //con un solo risultato non faccio l'autozoom
+																								 if (data.length > 1) {
 																								 //autozoom mappa
-																								 mapHome.fitBounds(bounds);
+																									mapHome.fitBounds(bounds);
+																								} else {
+																									mapHome.setCenter(new google.maps.LatLng(data[0]['coordinates'][0][0],data[0]['coordinates'][0][1]))
+																								}
+																								 //mermorizzo il centro della centroMappa
+																								 centroMappa = mapHome.getCenter();
+
+																								 //imposto lazione di ricentraggio della mappa in caso di resize
+																							 	addEventCentroMappa()
 
 																						 })
 																						 .fail(function(data) {
@@ -504,11 +531,14 @@ var infoWindowOpen = null;
 
 //******* scheda *******//
 		function initScheda() {
+
 			$('#commenti #menu2 a').click(campiCommento);
 			//nascondo i campi input
 			$('#commenti #areaInserimento').hide();
 			//filtro commenti
 			$('#commenti #menu1 select').change(filtraCommentiChange);
+
+
 
 		}
 
@@ -552,118 +582,184 @@ var directionsDisplay;
 var directionsService;
 
 function initMapScheda() {
-	directionsDisplay = new google.maps.DirectionsRenderer();
-	directionsService = new google.maps.DirectionsService();
-
-	mapHome = new google.maps.Map(document.getElementById('map'), {
-																center: {lat: latDefault, lng: lngDefault},
-																zoom: 12,
-																streetViewControl: false,
-																fullscreenControl: false,
-																mapTypeControl: false,
-																styles: 	[
-																							 {
-																								 featureType: "poi.business",
-																								 stylers: [
-																									{ visibility: "off" }
-																								 ]
-																							 },
-																							 {
-																								 featureType: "poi.sports_complex",
-																								 stylers: [
-																									{ visibility: "off" }
-																								 ]
-																							 }
-
-																						]
-
-															});
-	//layer bici
-	var bikeLayer = new google.maps.BicyclingLayer();
-  bikeLayer.setMap(mapHome);
-
-	//inserimento pin sponsor
-	addMarker(mapHome,'1',45.43838419999999,10.991621500000065,1);
+	var url = window.location.pathname ;
 
 
+	//carico i dati della schedaId
+	$.getJSON('/private/api/json'+url)
+						.done(function(data) {
 
-	//inizializzo il percorso
-	directionsDisplay.setMap(mapHome);
+								if(data['error']==true) {
+									$("#map").hide()
+									return;
+								}
 
-	var start = new google.maps.LatLng({lat: 45.435480013105355, lng: 10.980502367019653});
-	var end = new google.maps.LatLng({lat: 45.438521466560076, lng: 10.9962241569519043});
-	var request = {
-		 origin: start,
-		 destination: end,
-		 travelMode: 'WALKING', //DRIVING
-		 unitSystem: google.maps.UnitSystem.METRIC,
-		 waypoints: [
-								 {
-									 location: new google.maps.LatLng({lat: 45.43273955326644, lng: 10.984225273132324}),
-									 stopover: false
-								 },{
-									 location: new google.maps.LatLng({lat: 45.434900311545114, lng: 10.98756194114685}),
-									 stopover: true
-								 },{
-									 location: new google.maps.LatLng({lat: 45.43685019312067, lng: 10.990909337997437}),
-									 stopover: false
-								 },{
-									 location: new google.maps.LatLng({lat: 45.4359543099525335 , lng: 10.993773937225342}),
-									 stopover: false
-								 },{
-									 location: new google.maps.LatLng({lat: 45.435766097395025, lng: 10.994642972946167}),
-									 stopover: false
-								 }],
-			optimizeWaypoints: false,
-			provideRouteAlternatives: false,
-			avoidHighways: true,
-			avoidTolls: true
-	 };
+								directionsDisplay = new google.maps.DirectionsRenderer();
+								directionsService = new google.maps.DirectionsService();
 
-	 directionsService.route(request, function(result, status) {
-		 //fare uno switch con gli altri status
-	  if (status == 'OK') {
-			directionsDisplay.setOptions( {
-																			suppressMarkers: true,
-																			polylineOptions: {strokeColor: '#ffb839',strokeWeight:'6',strokeOpacity: 0.7, clickable: true}
+								mapHome = new google.maps.Map(document.getElementById('map'), {
+																							center: {lat: data[0]['coordinates'][0][0], lng: data[0]['coordinates'][0][1]},
+																							zoom: 12,
+																							streetViewControl: false,
+																							fullscreenControl: false,
+																							mapTypeControl: false,
+																							styles: 	[
+																														 {
+																															 featureType: "poi.business",
+																															 stylers: [
+																																{ visibility: "off" }
+																															 ]
+																														 },
+																														 {
+																															 featureType: "poi.sports_complex",
+																															 stylers: [
+																																{ visibility: "off" }
+																															 ]
+																														 }
 
-																			}
+																													]
 
-																		 );
-      //directionsDisplay.setDirections(result);
-			addMarker(mapHome,'1',45.435480013105355,10.980502367019653,2);
+																						});
 
-			//test polyline
-			var pol = result.routes[0].overview_polyline
+								//layer bici
+								var bikeLayer = new google.maps.BicyclingLayer();
+								bikeLayer.setMap(mapHome);
 
-			var flightPath = new google.maps.Polyline({
-          path: google.maps.geometry.encoding.decodePath(pol),
-          geodesic: true,
-          strokeColor: '#ffb839',
-          strokeOpacity: 0.7,
-          strokeWeight: 7
-        });
+								//bounds per autozoom
+								var bounds = new google.maps.LatLngBounds();
 
-        flightPath.setMap(mapHome);
+								var wayout = []
+								var tappa = 1;
 
-				flightPath.addListener("click", function() {alert("click su poliline")})
-
-				//var bounds = new google.maps.LatLngBounds();
-
-				//bounds.extend(flightPath.getPath());
-				//mapHome.fitBounds(bounds);
-
-				//alert(flightPath.getPath())
-
-    }
+								$.each(data[0]['coordinates'], function(key,value) {
 
 
+									if (data[0]['scheda']['tappe'][key][0] == true) {
+										addMarker(mapHome,value[0],value[1],data[0]['scheda']['tappe'][key][1],2,tappa);
+										bounds.extend(new google.maps.LatLng(value[0],value[1]));
+
+										wayout.push({
+																location: new google.maps.LatLng({lat: value[0], lng: value[1]}),
+																stopover: true
+
+																})
+
+										tappa++;
+									} else  {
+
+
+										wayout.push({
+																location: new google.maps.LatLng({lat: value[0], lng: value[1]}),
+																stopover: false
+																})
+									}
+
+									})
+
+										//autozoom
+										 mapHome.fitBounds(bounds);
+
+										 //inizializzo il percorso
+										 directionsDisplay.setMap(mapHome);
+
+										 var start = wayout[0]['location'];
+									 	var end =wayout[wayout.length-1]['location'];
+
+									 	var request = {
+									 		 origin: start,
+									 		 destination: end,
+									 		 travelMode: 'WALKING', //DRIVING
+									 		 unitSystem: google.maps.UnitSystem.METRIC,
+									 		 waypoints: wayout,
+									 			optimizeWaypoints: false,
+									 			provideRouteAlternatives: false,
+									 			avoidHighways: true,
+									 			avoidTolls: true
+									 	 };
+
+
+										 directionsService.route(request, function(result, status) {
+											 //fare uno switch con gli altri status
+										  if (status == 'OK') {
+												directionsDisplay.setOptions( {
+																												suppressMarkers: true,
+																												polylineOptions: {strokeColor: '#ffb839',strokeWeight:'6',strokeOpacity: 0.7, clickable: true}
+
+																												}
+
+																											 );
+												//test polyline
+												var pol = result.routes[0].overview_polyline
+
+												var flightPath = new google.maps.Polyline({
+									          path: google.maps.geometry.encoding.decodePath(pol),
+									          geodesic: true,
+									          strokeColor: '#ffb839',
+									          strokeOpacity: 0.7,
+									          strokeWeight: 7
+									        });
+
+									        flightPath.setMap(mapHome);
+
+													flightPath.addListener("click", function(event) {
+
+																																					var infowindow = new google.maps.InfoWindow({
+																																																											 content: "<h6 class=\"titlemap\">Segnala</h6><p class=\"textmap\"><a href=\"#\" onclick=\"insertAvviso(1,"+event.latLng.lat()+","+event.latLng.lng()+")\">Strada dissestata</a><br/><a href=\"#\" onclick=\"insertAvviso(2,"+event.latLng.lat()+","+event.latLng.lng()+")\">Zona trafficata</a><br/><a href=\"#\" onclick=\"insertAvviso(3,"+event.latLng.lat()+","+event.latLng.lng()+")\">Chiuso per lavori</a><br/><a href=\"#\" onclick=\"insertAvviso(4,"+event.latLng.lat()+","+event.latLng.lng()+")\">Pericolo</a><br/><a href=\"#\" onclick=\"insertAvviso(5,"+event.latLng.lat()+","+event.latLng.lng()+")\">Errore mappa</a><p>"
+																																																										 });
+																																					if (infoWindowOpen) {
+																																						infoWindowOpen.close()
+																																					}
+																																					infowindow.setPosition(event.latLng)
+																																					infowindow.open(mapHome);
+
+																																					infoWindowOpen = infowindow
+
+																																		})
+
+
+
+													//mermorizzo il centro della centroMappa
+													centroMappa = mapHome.getCenter();
+
+													//imposto lazione di ricentraggio della mappa in caso di resize
+												 addEventCentroMappa()
+
+									    }
+									});
+
+
+
+
+
+						})
+						.fail(function(data) {
+								//in caso di errore nascondo la mappa
+								$("#map").hide()
+						})
+
+
+		//alert(flightPath.getPath())
 		//result.routes[0].overview_path -> da usare per caricare fontanelle, bar e ristoranti
 		//result.routes[0].legs[0].distance.value -> calcolare la distanza dei vari segmenti
 
-  });
-
 }
 
+function insertAvviso(n, lat, long) {
+	//1 Strada dissestata
+	//2 Zona trafficata
+	//3 chiuso per lavori
+	//4 Pericolo
+	//5 Errore centro
 
-//  map = new google.maps.Map(document.getElementById('map'), mapOptions);
+	alert("pericolo" + n + "\n" + "coordinate -> " + lat +", " + long)
+	infoWindowOpen.close()
+}
+function setCentroMappa() {
+	mapHome.setCenter(centroMappa)
+}
+
+function addEventCentroMappa() {
+	$(window).resize(function() {clearTimeout(resizeAction);
+														 resizeAction = setTimeout(setCentroMappa, 150);
+														 });
+}

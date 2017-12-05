@@ -1,3 +1,5 @@
+//api akismet 98d8beff97bd
+
 var express = require("express");
 var ba = require("./bikeaway-handlers/base");
 var methodOverride = require('method-override');
@@ -427,7 +429,7 @@ app.get("/:slag_category/:slag_percorso",function(req,res) {
 
 //INDEX
 app.get("/", function(req,res) {
-  //carico id utente
+
   var idCookie = req.cookies.sessionid;
 
   async.waterfall([
@@ -856,12 +858,7 @@ app.get("/", function(req,res) {
 // variabili get per recuperare la pagina ?page=n {1,2,3,n}
 // dimensione fissa
 // o paginazione via JS?
-/*app.use("/private/api/json/:slag_percorso", function(res,req,next) {
-  console.log("json")
-  res.header("Access-Control-Allow-Origin", "http://localhost:8080");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  next()
-})*/
+
 
 //xhr per home
 app.get("/private/api/json/all/", function(req,res) {
@@ -915,6 +912,135 @@ app.get("/private/api/json/all/", function(req,res) {
 
 })
 
+//json ricerca
+app.get("/private/api/json/cerca", function(req,res) {
+  var parolaRicercata = req.query.q;
+  var searchKeyword = ba.keyWordGenerator(parolaRicercata);
+
+
+  async.waterfall([
+        function(callback) {
+          baDB.collection('percorsi').aggregate([
+                                                    {
+                                                            $match: {
+                                                                      'scheda.publish':true,
+                                                                      'scheda.tags': { $all: searchKeyword }
+                                                                    }
+                                                     },
+                                                     {
+                                                         $lookup: {
+                                                                    from:"category",
+                                                                    localField: "scheda._idcategory",
+                                                                    foreignField: "_id",
+                                                                    as: "categoria"
+
+                                                             }
+
+                                                      },{
+                                                          $project: {  "_id":1,
+                                                                       "coordinates": {
+                                                                                          "$slice": [ "$coordinates", 0,1]
+                                                                                       },
+                                                                       "scheda.title":1,
+                                                                       "scheda.difficolta":1,
+                                                                       "scheda.lunghezza":1,
+                                                                       "scheda.pendenza":1,
+                                                                       "scheda.strada":1,
+                                                                       "categoria": {
+                                                                                       "title":1,
+                                                                                       "_id":1
+                                                                                     }
+
+                                                                     }
+                                                    }
+                                                  ]).toArray(function(err,result) {
+                                                    if(err) {
+                                                      callback(err)
+                                                      return;
+                                                    }
+
+                                                    callback(null, result)
+
+
+                                                  })
+
+        },
+        function(result,callback) {
+          if(result.length==0) {
+            baDB.collection('percorsi').aggregate([
+                                                          {
+                                                                  $match: {
+
+                                                                             $text: { $search: parolaRicercata,
+                                                                                      $caseSensitive: false},
+                                                                             'scheda.publish':true,
+                                                                          }
+                                                           },
+                                                           {
+                                                               $lookup: {
+                                                                          from:"category",
+                                                                          localField: "scheda._idcategory",
+                                                                          foreignField: "_id",
+                                                                          as: "categoria"
+
+                                                                   }
+
+                                                            },{
+                                                                $project: {  "_id":1,
+                                                                             "coordinates": {
+                                                                                                "$slice": [ "$coordinates", 0,1]
+                                                                                             },
+                                                                             "scheda.title":1,
+                                                                             "scheda.difficolta":1,
+                                                                             "scheda.lunghezza":1,
+                                                                             "scheda.pendenza":1,
+                                                                             "scheda.strada":1,
+                                                                             "categoria": {
+                                                                                             "title":1,
+                                                                                             "_id":1
+                                                                                           }
+
+                                                                           }
+                                                          }
+
+
+                                                  ]).toArray(
+                                                    function(err,result) {
+                                                    if(err) {
+                                                      callback(err)
+                                                      return;
+                                                    }
+
+                                                    callback(null, result)
+
+                                                  })
+
+
+
+          } else {
+            callback(null,result)
+          }
+
+        }],
+        function(err, result) {
+          res.header("Access-Control-Allow-Origin", "http://localhost:8080/");
+          res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+          res.setHeader('Content-Type', 'application/json');
+
+           if (err || result.length==0) {
+             console.log("Errore /private/api/json/all/ ->" +err);
+             res.end(JSON.stringify({error: true}));
+             return
+           }
+
+           res.end(JSON.stringify(result));
+
+        }
+
+
+  )
+})
+
 //json per caricare tutti i percorsi di una categoria
 app.get("/private/api/json/category/:slag_category", function(req,res) {
   var idCategory = req.params.slag_category
@@ -961,7 +1087,7 @@ app.get("/private/api/json/category/:slag_category", function(req,res) {
                                                res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
                                                res.setHeader('Content-Type', 'application/json');
 
-                                                if (err || result.lenght==0) {
+                                                if (err || result.length==0) {
                                                   console.log("Errore /private/api/json/all/ ->" +err);
                                                   res.end(JSON.stringify({error: true}));
                                                   return
@@ -972,10 +1098,72 @@ app.get("/private/api/json/category/:slag_category", function(req,res) {
 
 })
 
-//json per caricare tutti i percorsi di una categoria
-app.get("/private/api/json/track/:slag_percorso/", function(req,res) {
-  res.end("carica commenti di " + req.params.slag_percorso);
+//upload commenti
+app.post("/private/api/json/commento/upload/", function(req,res) {
+  /*  var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+    console.log(ip);
+    ::1 -> 127.0.0.1*/
+  //  console.log(req.header('Referer'));
+  //console.log(req.headers['user-agent']);
+    //carico id utente
+    res.end(JSON.stringify({commento: true}));
 })
+
+
+//json per caricare i commenti di un percorso
+app.get("/private/api/json/commenti/:slag_percorso/", function(req,res) {
+  var idPercorso = req.params.slag_percorso;
+
+
+
+                           baDB.collection("commenti").find({_idPercorso: idPercorso, status: "ok"}, {data:1,autore:1,commento:1,tappa:1,_id:0})
+                                                      .sort({data: -1})
+                                                      .toArray(function(err, result) {
+                                                       res.header("Access-Control-Allow-Origin", "http://localhost:8080/");
+                                                       res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+                                                       res.setHeader('Content-Type', 'application/json');
+
+                                                       if (err) {
+                                                         console.log("Errore /private/api/json/commenti/"+idPercorso +" ->" +err);
+                                                         res.end(JSON.stringify({error: true}));
+                                                         return
+                                                       }
+
+                                                       if(result.length==0) {
+                                                         res.end(JSON.stringify({commenti: 0}));
+                                                       }
+
+                                                       res.end(JSON.stringify(result));
+
+                                                    })
+})
+
+
+
+//json per caricare tutti i percorsi di una categoria
+app.get("/private/api/json/:slag_category/:slag_percorso/", function(req,res) {
+  var idPercorso = req.params.slag_percorso;
+  var idCategory = req.params.slag_category;
+
+
+
+                           baDB.collection("percorsi").find({_id: idPercorso, "scheda._idcategory": idCategory, "scheda.publish": true}, {"scheda.tags":0, "scheda.view":0})
+                                                      .toArray(function(err, result) {
+                                                       res.header("Access-Control-Allow-Origin", "http://localhost:8080/");
+                                                       res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+                                                       res.setHeader('Content-Type', 'application/json');
+
+                                                       if (err || result.length==0) {
+                                                         console.log("Errore /private/api/json/singolopercorso ->" +err);
+                                                         res.end(JSON.stringify({error: true}));
+                                                         return
+                                                       }
+
+                                                       res.end(JSON.stringify(result));
+
+                                                    })
+})
+
 
 
 
@@ -996,7 +1184,6 @@ app.get("*", function(req,res) {
 // api mailchimp
 // api akismet
 // sistemare filtering con javascript
-// ricentrare la mappa quando si riduce per cellulare
 //sistemre il filtro della scheda sul cellulare
 
 

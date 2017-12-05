@@ -299,7 +299,7 @@ body {
   padding-right: 15px;
 }
 #percorsi article.row > div header a:hover div,
-#percorsi article.row > div:focus header a div {
+#percorsi article.row > div header a:focus div {
   background-color: #fff1d4;
 }
 
@@ -758,21 +758,21 @@ body {
   padding: 8px 0px 5px 5px;
 }
 .percorso:not(.highlight) a:hover section,
-.percorso:focus:not(.highlight) a section
+.percorso:not(.highlight) a:focus section
  {
   background-color: #ffe9ba;
   outline-width: 0px;
   outline-style: none;
 }
 .percorso:not(.highlight) a:hover h3,
-.percorso:focus:not(.highlight) a h3,
+.percorso:not(.highlight) a:focus h3,
 .percorso a:hover h4,
-.percorso:focus a h4 {
+.percorso a:focus h4 {
   background-color: #9d0029;
   color: #fff;
 }
 .percorso.highlight a:hover section,
-.percorso.highlight:focus a section {
+.percorso.highlight a:focus section {
   background-color: #fff1d4;
 }
 .percorso .row.dettagli {
@@ -841,6 +841,15 @@ p.textmap span {
 p.textmap span.full {
   background-color: #ffc752;
 }
+p.textmap a {
+  color: #000;
+  text-decoration: none;
+  line-height: 20px;
+}
+p.textmap a:hover {
+  color: #000;
+  text-decoration: underline;
+}
 p.tagsmap {
 	font-family: 'Roboto Slab', "Times New Roman", Times, serif;
 	font-size: 12px;
@@ -849,4 +858,11 @@ p.tagsmap {
 p.tagsmap span {
   color: #9d0029;
   margin-right: 5px;
+}
+p.tagsmap a {
+  text-decoration: none;
+  color: #000000;
+}
+p.tagsmap a:hover {
+  color: #ffc752;
 }

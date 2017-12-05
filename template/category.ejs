@@ -27,7 +27,7 @@
           <section class="col-sm-3 col-sm-push-9">
             <section id="order" class="background-red">
               <h4>Ordinamento</h4>
-              <select name="orderInput" id="orderInput" tabindex="8">
+              <select name="orderInput" id="orderInput" tabindex="1">
                                                       <option value="0">Alfabetico Crescente</option>
                                                       <option value="1">Alfabetico Decrescente</option>
                                                       <option value="2">Distanza Crescente</option>
@@ -46,19 +46,19 @@
                       <label for="lung">lunghezza max.</label>
                     </div>
                     <div class="col-md-4 col-sm-12">
-                      <input type="text" name="lung" id="lung" tabindex="6" placeholder="Km" pattern="[0-9]{0,3}" maxlength="3"/><br/>
+                      <input type="text" name="lung" id="lung" tabindex="2" placeholder="Km" pattern="[0-9]{0,3}" maxlength="3"/><br/>
                     </div>
                     <div class="col-md-8 col-sm-12">
                       <label for="pend">pendenza max.</label>
                     </div>
                     <div class="col-md-4 col-sm-12">
-                      <input type="text" name="pend" id="pend" tabindex="7" placeholder="%" pattern="[0-9]{0,3}" maxlength="3"  /><br/>
+                      <input type="text" name="pend" id="pend" tabindex="3" placeholder="%" pattern="[0-9]{0,3}" maxlength="3"  /><br/>
                     </div>
                     <div class="col-md-8 col-sm-12">
                       <label for="type">tipo di strada</label>
                     </div>
                     <div class="col-md-4 col-sm-12">
-                      <select name="type" id="type" tabindex="8">
+                      <select name="type" id="type" tabindex="4">
                                                               <option value="0">tutte</option>
                                                               <option value="1">asfalto</option>
                                                               <option value="2">terra</option>
@@ -70,7 +70,7 @@
                       <label for="diff">difficoltà</label>
                     </div>
                     <div class="col-md-4 col-sm-12">
-                        <select id="diff" name="diff" tabindex="9">
+                        <select id="diff" name="diff" tabindex="5">
                                                               <option value="0">tutte</option>
                                                               <option value="1">*</option>
                                                               <option value="2">**</option>
@@ -78,21 +78,21 @@
                                                             </select>
                     </div>
                 </div>
-              <label><input type="checkbox" name="bambini" value="1" tabindex="10" />vicino a me</label><br />
-              <label><input type="checkbox" name="vicino" value="1" tabindex="11"  />adatto ai bambini</label><br/>
+              <label><input type="checkbox" name="bambini" value="1" tabindex="6" />vicino a me</label><br />
+              <label><input type="checkbox" name="vicino" value="1" tabindex="7"  />adatto ai bambini</label><br/>
 
-              <button type="button">applica</button>
+              <button type="button" tabindex="8">applica</button>
 
             </section>
 
             <!--categorie -->
-            <% if(categoryObj!= undefined) { %>
+            <% var tabindex = 8; if(categoryObj!= undefined) { %>
             <section id="cat" class="background-red">
               <h4>Categorie</h4>
               <ul>
                 <% categoryObj.forEach(function category(objCat) { %>
-                <li><a href="/<%= objCat._id%>"><%= objCat['title']%></a></li>
-                <% });%>
+                <li><a href="/<%= objCat._id%>" tabindex="<%= tabindex %>"><%= objCat['title']%></a></li>
+                <% tabindex++; });%>
               </ul>
             </section>
             <%  }; %>
@@ -103,7 +103,7 @@
             <div class="row">
               <% percorsiObj[0]['percorsi'].forEach(function percorsi(obj) {%>
                 <article class="col-sm-6 percorso" data-bambini="<%= obj.scheda.bambini %>" data-lan="<%= obj.coordinates[0][0] %>" data-lon="<%= obj.coordinates[0][1] %>">
-                    <a href="/<%= obj.scheda._idcategory + "/" + obj._id%>">
+                    <a href="/<%= obj.scheda._idcategory + "/" + obj._id%>" tabindex="<%= tabindex %>">
                       <h3><%= obj['scheda']['title'] %></h3>
                         <section>
                           <div class="row">
@@ -121,7 +121,7 @@
                       </section>
                     </a>
                   </article>
-                <% }); %>
+                <% tabindex++; }); %>
 
 
 
