@@ -535,8 +535,6 @@ var centroMappa = null;
 			$('#commenti #menu2 a').click(campiCommento);
 			//nascondo i campi input
 			$('#commenti #areaInserimento').hide();
-			//filtro commenti
-			$('#commenti #menu1 select').change(filtraCommentiChange);
 
 
 
@@ -547,39 +545,12 @@ var centroMappa = null;
 			$('#commenti #areaInserimento').slideToggle();
 		}
 
-		function filtraCommentiChange(e) {
 
-
-			var dd = $(e.target);
-			var scelta = parseInt(dd.val());
-
-			var commenti = $('#commenti .corpo-commento');
-			var commentiTappe = $('#commenti .corpo-commento div.tappa').parents('article.corpo-commento');
-			var commentiGenerali = commenti.not(commentiTappe);
-
-
-
-			if(scelta==-1) {
-				commenti.delay(200).fadeIn(200);
-			} else if (scelta==0) {
-				commentiTappe.fadeOut(100);
-				commentiGenerali.delay(200).fadeIn(200);
-			} else {
-				commentiGenerali.fadeOut(100);
-				commentiTappe.fadeOut(100)
-				commentiTappe.each(function() {
-																				if ($(this).children("div.tappa").text()==scelta) {
-																						$(this).delay(200).fadeIn(200);
-																				} else {
-																						$(this).fadeOut(100);
-																				}
-
-													});
-			}
-}
 
 var directionsDisplay;
 var directionsService;
+var allComments;
+var paginazioneObj;
 
 function initMapScheda() {
 	var url = window.location.pathname ;
@@ -704,7 +675,7 @@ function initMapScheda() {
 													flightPath.addListener("click", function(event) {
 
 																																					var infowindow = new google.maps.InfoWindow({
-																																																											 content: "<h6 class=\"titlemap\">Segnala</h6><p class=\"textmap\"><a href=\"#\" onclick=\"insertAvviso(1,"+event.latLng.lat()+","+event.latLng.lng()+")\">Strada dissestata</a><br/><a href=\"#\" onclick=\"insertAvviso(2,"+event.latLng.lat()+","+event.latLng.lng()+")\">Zona trafficata</a><br/><a href=\"#\" onclick=\"insertAvviso(3,"+event.latLng.lat()+","+event.latLng.lng()+")\">Chiuso per lavori</a><br/><a href=\"#\" onclick=\"insertAvviso(4,"+event.latLng.lat()+","+event.latLng.lng()+")\">Pericolo</a><br/><a href=\"#\" onclick=\"insertAvviso(5,"+event.latLng.lat()+","+event.latLng.lng()+")\">Errore mappa</a><p>"
+																																																											 content: "<h6 class=\"titlemap\"><strong>Segnalazione</strong></h6><p class=\"textmap\"><a href=\"#\" onclick=\"insertAvviso(1,"+event.latLng.lat()+","+event.latLng.lng()+")\"><img src=\"/images/strada-dissestata.png\" alt=\"strada dissestata\" /> Strada dissestata</a><br/><a href=\"#\" onclick=\"insertAvviso(2,"+event.latLng.lat()+","+event.latLng.lng()+")\"><img src=\"/images/traffico.png\" alt=\"traffico\" /> Zona trafficata</a><br/><a href=\"#\" onclick=\"insertAvviso(3,"+event.latLng.lat()+","+event.latLng.lng()+")\"><img src=\"/images/chiuso-per-lavori.png\" alt=\"chiuso per lavori\" /> Chiuso per lavori</a><br/><a href=\"#\" onclick=\"insertAvviso(4,"+event.latLng.lat()+","+event.latLng.lng()+")\"><img src=\"/images/pericolo.png\" alt=\"strada pericolo\" /> Pericolo</a><br/><a href=\"#\" onclick=\"insertAvviso(5,"+event.latLng.lat()+","+event.latLng.lng()+")\"><img src=\"/images/errore-mappa.png\" alt=\"errore mappa\" /> Errore mappa</a><p>"
 																																																										 });
 																																					if (infoWindowOpen) {
 																																						infoWindowOpen.close()
@@ -738,10 +709,131 @@ function initMapScheda() {
 						})
 
 
+		var slagPercorso = url.split("/")
+		//carico i dati dei commenti
+		$.getJSON("/private/api/json/commenti/"+slagPercorso[2])
+							.done(function(data) {
+
+									var listaCommenti = $("#listacommenti")
+
+
+									if(data['error']==true || data['commenti']==0) {
+										listaCommenti.append('<article class="col-sm-9 corpo-commento"><p><strong>Nessun commento inserito</strong></p></article>');
+										return
+									}
+
+									//metto i commenti in una variabile globale
+									allComments = data;
+
+									//attivaizone della paginazione
+									var containerPag = $('#paginazione');
+									var dataContainer = $('#listacommenti');
+
+
+									containerPag.pagination({
+									    dataSource: allComments,
+											pageSize: 10,
+											callback: function(data, pagination) {
+																														 // template method of yourself
+																														 var html = formattazioneCommento2(data);
+																														 dataContainer.html(html);
+																												 }
+									});
+
+
+									paginazioneObj = containerPag
+
+									//filtro commenti
+									$('#commenti #menu1 select').change(filtraCommentiChange);
+
+									//verifico l'altezza del contenitore dei commenti e lo imposto come altezza minima
+									dataContainer.css('min-height',dataContainer.height());
+									var listacommenti = $("#listacommenti");
+									containerPag.css('min-height',containerPag.height());
+
+
+
+
+							})
+
 		//alert(flightPath.getPath())
 		//result.routes[0].overview_path -> da usare per caricare fontanelle, bar e ristoranti
 		//result.routes[0].legs[0].distance.value -> calcolare la distanza dei vari segmenti
+}
 
+function filtraCommentiChange(e) {
+
+	var dd = $(e.target);
+	var scelta = parseInt(dd.val());
+
+	var containerPag = $('#paginazione');
+	var dataContainer = $('#listacommenti');
+	var articoli =$("#listacommenti article")
+	dataContainer.fadeOut(100, function() {
+
+																//nascondo tutti i commenti e poi li distruggo
+																articoli.remove()
+
+																//distruggo la vecchia paginazione
+																paginazioneObj.pagination('destroy')
+
+
+																//pulisco la sorgetnte dati di paginazione
+																var result = [];
+																$.each(allComments,function(key,value) {
+																		if (scelta==value['tappa'] || scelta == -1) {
+																			result.push(value)
+																		}
+																})
+
+																if (result.length>0) {
+																		containerPag.pagination({
+																				dataSource: result,
+																				pageSize: 10,
+																				callback: function(data, pagination) {
+																																							 // template method of yourself
+																																							 var html = formattazioneCommento2(data);
+																																							 dataContainer.html(html);
+																																					 },
+																		});
+
+																		//salvo nel globale la nuova paginazioneObj
+																		paginazioneObj = containerPag
+																} else {
+																		dataContainer.append('<article class="col-sm-9 corpo-commento"><p>Nessun commento per la <strong>tappa '+scelta+	'</strong></p></article>')
+
+																}
+
+															 dataContainer.fadeIn(100)
+			})
+
+}
+
+function formattazioneCommento2(data) {
+	var html = "";
+
+	$.each(data, function(key,value) {
+			html+=formattazioneCommento(value['data'],value['autore'],value['commento'],value['tappa'])
+	})
+
+	return html
+}
+
+function formattazioneCommento(data,autore,commento,tappa) {
+	var html = "";
+	var d = new Date(data);
+
+	html += '<article class="col-sm-9 corpo-commento">';
+
+	if (tappa > 0) {
+		html += '<div class="tappa">'+tappa+'</div>'
+	}
+
+	html += '<p>'+d.getDate()+'.'+(d.getMonth()+1)+'.'+d.getFullYear()+' | <strong>'+autore+'</strong><br/>'+commento+'</p>'
+
+	html += '</article>';
+
+	return html;
 }
 
 function insertAvviso(n, lat, long) {

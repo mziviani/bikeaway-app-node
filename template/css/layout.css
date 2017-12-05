@@ -844,11 +844,12 @@ p.textmap span.full {
 p.textmap a {
   color: #000;
   text-decoration: none;
-  line-height: 20px;
+  line-height: 25px;
+  font-size: 13px;
+
 }
 p.textmap a:hover {
-  color: #000;
-  text-decoration: underline;
+  color: #9d0029;
 }
 p.tagsmap {
 	font-family: 'Roboto Slab', "Times New Roman", Times, serif;

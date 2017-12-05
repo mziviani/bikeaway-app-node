@@ -7,6 +7,8 @@ var mongoClient = require('mongodb').MongoClient;
 var async = require("async");
 var crypto = require("crypto");
 var cookieParser = require('cookie-parser');
+var striptags = require('striptags');
+
 
 
 var app = express();
@@ -854,10 +856,7 @@ app.get("/", function(req,res) {
 
 });
 
-//commenti -> output JSON
-// variabili get per recuperare la pagina ?page=n {1,2,3,n}
-// dimensione fissa
-// o paginazione via JS?
+
 
 
 //xhr per home
@@ -1106,6 +1105,8 @@ app.post("/private/api/json/commento/upload/", function(req,res) {
   //  console.log(req.header('Referer'));
   //console.log(req.headers['user-agent']);
     //carico id utente
+    //striptags("testo html");
+
     res.end(JSON.stringify({commento: true}));
 })
 
