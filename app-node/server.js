@@ -8,13 +8,18 @@ var async = require("async");
 var crypto = require("crypto");
 var cookieParser = require('cookie-parser');
 var striptags = require('striptags');
+var bodyParser = require('body-parser');
+var akismet = require('akismet-api');
+
 
 
 
 var app = express();
 
+
 //imposto lengine di ejs per template
 app.set("view engine", "ejs");
+
 
 //connesione al db
 var url = 'mongodb://localhost:27017/Bikeaway';
@@ -27,6 +32,18 @@ mongoClient.connect(url, function(err, db) {
   baDB=db
 });
 
+//verifica akismet
+var clientAki = akismet.client({
+  key  : '98d8beff97bd',                   // Required!
+  blog : 'http://localhost'       // Required!
+});
+
+//scrivo sul log il risultato
+clientAki.verifyKey()
+.then(function(valid) {
+  if (valid) console.log('Akismet Valid key!');
+  else console.log('Akismet Invalid key!');
+})
 
 //percorso statico per caricare i file dei template
 app.use(express.static(__dirname + "/../template"));
@@ -35,6 +52,11 @@ app.use(express.static(__dirname + "/../template"));
 //pag 131
 app.use("/private/api/json/:slag_percorso", methodOverride());
 app.use("/private/api/json/all", methodOverride());
+app.use("/private/api/json/commento/upload", methodOverride());
+
+//upload commenti
+app.use(bodyParser.urlencoded({ extended: false }))
+
 
 //set cookieParser
 app.use(cookieParser());
@@ -1097,8 +1119,40 @@ app.get("/private/api/json/category/:slag_category", function(req,res) {
 
 })
 
-//upload commenti
+
+
 app.post("/private/api/json/commento/upload/", function(req,res) {
+  var autore = req.body.autore;
+  var idPercorso = req.body._idPercorso;
+  var mail = req.body.mail;
+  var commento = req.body.commento;
+  var tappa = req.body.tappa;
+  var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  var headers = req.header['user-agent'];
+  var data = new Date(Date.now());
+  var referrer = req.header('Referer');
+  var pass = "spam"
+
+  //controllo che il messaggio non sia spam mediante akismet-api
+  //usare aync
+  clientAki.checkSpam({
+                      user_ip : ip,              // Required!
+                      user_agent : headers,    // Required!
+                      referrer : referrer,          // Required!
+                      comment_author : autore,
+                      comment_author_email : mail,
+                      comment_content : commento,
+                    }, function(err, spam) {
+                                            if (err) console.log ('Error!');
+                                            if (spam) {
+                                              pass="spam"
+                                            } else {
+                                              pass="ok"
+                                            }
+                    });
+
+    console.log(pass);
+   //baDB.collection("commenti").insert({_idPercorso: idPercorso, data: data, autore: autore, mail: mail, commento: commento, status: "ok", tappa: tappa, ip: ip})
   /*  var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     console.log(ip);
     ::1 -> 127.0.0.1*/
@@ -1107,7 +1161,13 @@ app.post("/private/api/json/commento/upload/", function(req,res) {
     //carico id utente
     //striptags("testo html");
 
-    res.end(JSON.stringify({commento: true}));
+    //res.end(JSON.stringify({commento: autore2}));
+    console.log(autore);
+    console.log(idPercorso);
+    console.log(mail);
+    console.log(commento);
+    console.log(tappa);
+    res.end("ciao")
 })
 
 

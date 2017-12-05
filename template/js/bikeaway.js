@@ -533,16 +533,53 @@ var centroMappa = null;
 		function initScheda() {
 
 			$('#commenti #menu2 a').click(campiCommento);
+
 			//nascondo i campi input
 			$('#commenti #areaInserimento').hide();
 
-
+			//azione per l'invio del campiCommento
+			$('#commenti #areaInserimento input[value="inserisci"]').click(inserisciCommento)
 
 		}
 
 		function campiCommento(e) {
 			e.preventDefault();
 			$('#commenti #areaInserimento').slideToggle();
+		}
+
+		function inserisciCommento(e) {
+
+			var form = $("form")
+
+			//verifico la validità del form tramite funzioni browser
+			if(form[0].checkValidity() === false) {
+      		return ;
+    	}
+
+			e.preventDefault()
+
+			var url = (window.location.pathname).split("/")
+			var idPercorso = url[url.length-1];
+
+			var autore = $("#commenti #areaInserimento #nome").val();
+			var mail = $("#commenti #areaInserimento #email").val();
+			var commento = $("#commenti #areaInserimento #commento").val();
+			var tappa = $("#commenti #areaInserimento #typec").val();
+
+
+			$.post("/private/api/json/commento/upload", {_idPercorso: idPercorso, autore: autore, mail: mail, commento: commento, tappa: tappa} )
+						.done(function(data) {
+								var result = JSON.parse(data)
+								alert("fatto ->" + result['commento'])
+						})
+						.fail(function(data) {
+								alert("fail -> " + data)
+
+						})
+
+
+
+
 		}
 
 
@@ -804,7 +841,7 @@ function filtraCommentiChange(e) {
 
 																}
 
-															 dataContainer.fadeIn(100)
+															 dataContainer.fadeIn(100);
 			})
 
 }

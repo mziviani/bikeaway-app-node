@@ -714,6 +714,26 @@ body {
 #commenti .corpo-commento .tappa + p {
   float: left;
 }
+#paginazione {
+  padding-top: 20px;
+  padding-bottom: 20px;
+  text-align: center;
+  font-size: 13px;
+}
+#paginazione ul {
+  margin: 0px;
+  padding: 0px;
+}
+#paginazione ul li {
+  list-style-type: none;
+  display: inline;
+  margin-left: 5px;
+  margin-right: 5px;
+}
+#paginazione ul li a {
+  color: #242424;
+  text-decoration: none;
+}
 /* STILI DEI PERCORSI SHORT */
 .percorso {
   min-height: 210px;

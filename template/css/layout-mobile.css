@@ -127,6 +127,9 @@
   border-style: solid;
   border-width: 1px;
 }
+#paginazione {
+  font-size: 1.8rem;
+}
   /* stili dei percorsi short */
   .percorso .row .lunghezza {
     text-align: left;
