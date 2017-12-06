@@ -38,7 +38,7 @@ var clientAki = akismet.client({
   blog : 'http://localhost'       // Required!
 });
 
-//scrivo sul log il risultato
+//scrivo sul log il risultato per verificare la key di akistmet
 clientAki.verifyKey()
 .then(function(valid) {
   if (valid) console.log('Akismet Valid key!');
@@ -1122,52 +1122,89 @@ app.get("/private/api/json/category/:slag_category", function(req,res) {
 
 
 app.post("/private/api/json/commento/upload/", function(req,res) {
-  var autore = req.body.autore;
-  var idPercorso = req.body._idPercorso;
-  var mail = req.body.mail;
-  var commento = req.body.commento;
-  var tappa = req.body.tappa;
+  var autore = (req.body.autore).trim();
+  var idPercorso = (req.body._idPercorso).trim();
+  var mail = (req.body.mail).trim();
+  var commento = (req.body.commento).trim();
+  var tappa = (req.body.tappa).trim();
   var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
   var headers = req.header['user-agent'];
   var data = new Date(Date.now());
   var referrer = req.header('Referer');
   var pass = "spam"
 
+  //1 type: 1 dati non validi
+  //2  type 2 SPAM
+  // 3 type3  ok
+  // 4 type 4 errore sistema
+
+  //se c'è qualche dato null ritorno un errore
+  if (autore == "" || idPercorso == "" || mail == "" || isNaN(tappa) || autore == null || idPercorso == null || mail == null ) {
+    res.end(JSON.stringify({code: 1}));
+    return;
+  }
+
   //controllo che il messaggio non sia spam mediante akismet-api
   //usare aync
-  clientAki.checkSpam({
-                      user_ip : ip,              // Required!
-                      user_agent : headers,    // Required!
-                      referrer : referrer,          // Required!
-                      comment_author : autore,
-                      comment_author_email : mail,
-                      comment_content : commento,
-                    }, function(err, spam) {
-                                            if (err) console.log ('Error!');
-                                            if (spam) {
-                                              pass="spam"
-                                            } else {
-                                              pass="ok"
-                                            }
-                    });
+  //1 controllo se è spam
+  //2 inserisco in db
+  //3 ritorno il risultato
+  async.waterfall([
+    function(callback) {
+      clientAki.checkSpam({
+                          user_ip : ip,
+                          user_agent : headers,
+                          referrer : referrer,
+                          comment_author : autore,
+                          comment_author_email : mail,
+                          comment_content : commento,
+                        }, function(err, spam) {
+                                                if (err) {
+                                                  callback(err);
+                                                };
+                                                if (spam) {
+                                                  callback(null, "spam");
+                                                } else {
+                                                  callback(null,"ok");
+                                                }
 
-    console.log(pass);
-   //baDB.collection("commenti").insert({_idPercorso: idPercorso, data: data, autore: autore, mail: mail, commento: commento, status: "ok", tappa: tappa, ip: ip})
-  /*  var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-    console.log(ip);
-    ::1 -> 127.0.0.1*/
-  //  console.log(req.header('Referer'));
-  //console.log(req.headers['user-agent']);
-    //carico id utente
-    //striptags("testo html");
+                        });
+    }, function(spam, callback) {
+      pass = spam;
 
-    //res.end(JSON.stringify({commento: autore2}));
-    console.log(autore);
-    console.log(idPercorso);
-    console.log(mail);
-    console.log(commento);
-    console.log(tappa);
-    res.end("ciao")
+      //striptags
+      autore =  striptags(autore);
+      mail = striptags(mail);
+      commento = striptags(commento);
+      commento = commento.replace("\n", "<br/>");
+
+      //inserisco in db
+      baDB.collection("commenti").insert({_idPercorso: idPercorso, data: data, autore: autore, mail: mail, commento: commento, status: pass, tappa: tappa, ip: ip}, function(err,result) {
+                                                                                                                                                                                          if (err) {
+                                                                                                                                                                                              callback(err)
+                                                                                                                                                                                              return
+                                                                                                                                                                                          }
+
+                                                                                                                                                                                          callback(null,result)
+                                                                                                                                                                                        })
+
+    }
+
+  ],function (err, result) {
+    if(err) {
+      console.log("errore inserimento commento ->" + err);
+      res.end(JSON.stringify({code: 4}))
+      return
+    }
+    if(result.result.ok && pass=="spam") {
+        res.end(JSON.stringify({code: 2}));
+        return;
+    };
+
+     res.end(JSON.stringify({code: 3}));
+  })
+
+
 })
 
 

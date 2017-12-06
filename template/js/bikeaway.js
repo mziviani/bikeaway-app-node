@@ -295,7 +295,7 @@ var centroMappa = null;
 				 marker.label.text = n
 
 				 var infowindow = new google.maps.InfoWindow({
-						content: '<h6 class="titlemap">'+nometappa+'</h6>'
+						content: '<h6 class="titlemap">'+nometappa+'</h6><p class="tagsmap"><a href="#" onclick="apriCommentidaTappa(event,'+n+')"><img src="/images/triangolo.png" alt="vai ai commenti"/> Commenta</a></p>'
   				});
 
 					marker.addListener('click', function() {
@@ -548,7 +548,6 @@ var centroMappa = null;
 		}
 
 		function inserisciCommento(e) {
-
 			var form = $("form")
 
 			//verifico la validità del form tramite funzioni browser
@@ -566,22 +565,92 @@ var centroMappa = null;
 			var commento = $("#commenti #areaInserimento #commento").val();
 			var tappa = $("#commenti #areaInserimento #typec").val();
 
+			//disabilito il pulsante
+			$("#areaInserimento form input[type='submit']").attr('disabled','disabled');
 
-			$.post("/private/api/json/commento/upload", {_idPercorso: idPercorso, autore: autore, mail: mail, commento: commento, tappa: tappa} )
+			//attivo il messaggio di attesa
+			$('#areaInserimento form').append('<div class="col-md-12"><p class="msg wait">Inserimento in corso</p></div>');
+			$('#areaInserimento form p.msg').hide().fadeIn();
+
+			$.post("/private/api/json/commento/upload", {_idPercorso: idPercorso, autore: autore, mail: mail, commento: commento, tappa: tappa}, "json" )
 						.done(function(data) {
 								var result = JSON.parse(data)
-								alert("fatto ->" + result['commento'])
+								var txt
+								var classe
+
+								switch(result.code) {
+									case 1:
+										txt = "I dati inseriti non sono validi.";
+										classe ="error";
+									break;
+									case 2:
+										txt = "Ci dispiace ma per noi il tuo messaggio è SPAM.";
+										classe ="error";
+									break;
+									case 3:
+										txt = "Grazie, il messaggio è stato inserito correttamente.";
+										classe ="ok";
+									break;
+									default:
+										txt = "Abbiamo riscontrato un errore. Cercheremo di risolverlo il prima possibile.";
+										classe ="error";
+								}
+
+									chiusuraCommenti(classe,txt, function() {
+										//aggiornare la paginazione + inserire il commento
+										if (result.code==3) {
+											allComments.unshift({"data": new Date(Date.now()), "autore": autore, "commento": commento, "tappa":tappa})
+										}
+
+										//imposto la visualizzazione su tutti
+										$('#commentType').val(-1).change();
+
+									})
+
+
+
+
+
 						})
 						.fail(function(data) {
-								alert("fail -> " + data)
-
+								chiusuraCommenti("error", "Abbiamo riscontrato un errore. Cercheremo di risolverlo il prima possibile.",null);
 						})
-
-
 
 
 		}
 
+function chiusuraCommenti(classe, txt, callback) {
+	$('#areaInserimento form p.msg').replaceWith('<p class="msg '+classe+'">'+txt+'</p>');
+	$('#commenti #areaInserimento').delay(1500).slideToggle();
+	$('#areaInserimento form p.msg').delay(1500).fadeOut(function() {
+																				this.remove();
+																				//abilito il pulsante
+																				$("#areaInserimento form input[type='submit']").removeAttr('disabled');
+
+																				//pulisco i campi
+																				var autore = $("#commenti #areaInserimento #nome").val("");
+																				var mail = $("#commenti #areaInserimento #email").val("");
+																				var commento = $("#commenti #areaInserimento #commento").val("");
+																				var tappa = $("#commenti #areaInserimento #typec").val(0);
+
+																				callback()
+																				});
+
+
+}
+
+function apriCommentidaTappa(e,n) {
+	e.preventDefault();
+
+	//scrollTo areaInserimento
+	$('html, body').animate({
+			 scrollTop:  $('#commenti header').offset().top
+	 }, 500);
+
+	$('#commenti #areaInserimento').slideDown();
+	$('#commenti #areaInserimento #typec').val(n);
+
+}
 
 
 var directionsDisplay;
