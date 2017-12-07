@@ -1119,7 +1119,30 @@ app.get("/private/api/json/category/:slag_category", function(req,res) {
 
 })
 
+//upload segnalazioni
+app.post("/private/api/json/segnalazioni/upload", function(req,res) {
+  var tipoSegnalazione = (req.body.tipoSegnalazione).trim();
+  var lat = (req.body.lat).trim();
+  var lng = (req.body.lng).trim();
 
+  if (isNaN(tipoSegnalazione) || isNaN(lat) || isNaN(lng) || tipoSegnalazione == null || lat==null || lng == null){
+    //Errore
+    //-> err
+    return
+  }
+
+
+  //risposta
+  // -> msg = "ok"
+  // -> err
+  res.end("invia segnalazioni -> " + tipoSegnalazione)
+})
+
+//download segnalazioni
+app.get("/private/api/json/segnalazioni/", function(req,res) {
+
+  res.end("download segnalazioni")
+})
 
 app.post("/private/api/json/commento/upload/", function(req,res) {
   var autore = (req.body.autore).trim();
@@ -1207,6 +1230,7 @@ app.post("/private/api/json/commento/upload/", function(req,res) {
 
 })
 
+//
 
 //json per caricare i commenti di un percorso
 app.get("/private/api/json/commenti/:slag_percorso/", function(req,res) {

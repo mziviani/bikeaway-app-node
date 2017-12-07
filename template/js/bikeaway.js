@@ -647,8 +647,13 @@ function apriCommentidaTappa(e,n) {
 			 scrollTop:  $('#commenti header').offset().top
 	 }, 500);
 
+	//apro l'area commenti
 	$('#commenti #areaInserimento').slideDown();
+	//imposto la tappa di inserimento
 	$('#commenti #areaInserimento #typec').val(n);
+
+	//visualizzao solo i commenti di quella tappa
+	$('#commentType').val(n).change();
 
 }
 
@@ -723,6 +728,9 @@ function initMapScheda() {
 
 										tappa++;
 									} else  {
+
+										/*addMarker(mapHome,value[0],value[1],data[0]['scheda']['tappe'][key][1],2,tappa);
+										tappa++*/
 
 
 										wayout.push({
@@ -868,7 +876,6 @@ function initMapScheda() {
 }
 
 function filtraCommentiChange(e) {
-
 	var dd = $(e.target);
 	var scelta = parseInt(dd.val());
 
@@ -949,9 +956,20 @@ function insertAvviso(n, lat, long) {
 	//4 Pericolo
 	//5 Errore centro
 
-	alert("pericolo" + n + "\n" + "coordinate -> " + lat +", " + long)
-	infoWindowOpen.close()
+	$.post("/private/api/json/segnalazioni/upload", {tipoSegnalazione: n, lat: lat, lng: long}, "json" )
+				.done(function(data) {
+					//in
+					alert(data)
+				})
+				.fail(function(data) {
+					alert("error")
+				})
+
+				infoWindowOpen.close()
+
+
 }
+
 function setCentroMappa() {
 	mapHome.setCenter(centroMappa)
 }
