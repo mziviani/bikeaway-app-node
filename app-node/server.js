@@ -1132,7 +1132,7 @@ app.post("/private/api/json/segnalazioni/upload", function(req,res) {
     return
   }
 
-  baDB.collection("alert").insert({type:"Point", coordinates: [lat,lng], data: {data: new Date(Date.now()), type: tipoSegnalazione, _idPercorso: percorso}}, function(err,result){
+  baDB.collection("alert").insert({type:"Point", coordinates: [Number(lat),Number(lng)], data: {data: new Date(Date.now()), type: tipoSegnalazione, _idPercorso: percorso}}, function(err,result){
                                                                                                                                                               res.header("Access-Control-Allow-Origin", "http://localhost:8080/");
                                                                                                                                                               res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
                                                                                                                                                               res.setHeader('Content-Type', 'application/json');
