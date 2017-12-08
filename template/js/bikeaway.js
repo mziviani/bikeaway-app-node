@@ -263,6 +263,8 @@ var centroMappa = null;
 
 
 		 }
+
+			//immagine pin
 		 function pinMarker(type) {
 			 var img
 			 switch (type) {
@@ -271,6 +273,21 @@ var centroMappa = null;
 				 break;
 				case 2:
 							img='pinTappa.png'
+				break;
+				case 3:
+							img='strada-dissestata.png'
+				break;
+				case 4:
+							img='traffico.png'
+				break;
+				case 5:
+							img='chiuso-per-lavori.png'
+				break;
+				case 6:
+						img='pericolo.png'
+				break;
+				case 7:
+						img='errore-mappa.png'
 				break;
 			 default:
 					 img='pinhome.png'
@@ -344,7 +361,6 @@ var centroMappa = null;
 
 
 		}
-
 
 
 
@@ -538,7 +554,11 @@ var centroMappa = null;
 			$('#commenti #areaInserimento').hide();
 
 			//azione per l'invio del campiCommento
-			$('#commenti #areaInserimento input[value="inserisci"]').click(inserisciCommento)
+			$('#commenti #areaInserimento input[value="inserisci"]').click(inserisciCommento);
+
+			//carico
+			//carico gli alert
+			retriveAlert()
 
 		}
 
@@ -655,6 +675,7 @@ function apriCommentidaTappa(e,n) {
 	//visualizzao solo i commenti di quella tappa
 	$('#commentType').val(n).change();
 
+
 }
 
 
@@ -673,6 +694,7 @@ function initMapScheda() {
 
 								if(data['error']==true) {
 									$("#map").hide()
+									$("#other-pins").hide()
 									return;
 								}
 
@@ -789,7 +811,7 @@ function initMapScheda() {
 													flightPath.addListener("click", function(event) {
 
 																																					var infowindow = new google.maps.InfoWindow({
-																																																											 content: "<h6 class=\"titlemap\"><strong>Segnalazione</strong></h6><p class=\"textmap\"><a href=\"#\" onclick=\"insertAvviso(1,"+event.latLng.lat()+","+event.latLng.lng()+")\"><img src=\"/images/strada-dissestata.png\" alt=\"strada dissestata\" /> Strada dissestata</a><br/><a href=\"#\" onclick=\"insertAvviso(2,"+event.latLng.lat()+","+event.latLng.lng()+")\"><img src=\"/images/traffico.png\" alt=\"traffico\" /> Zona trafficata</a><br/><a href=\"#\" onclick=\"insertAvviso(3,"+event.latLng.lat()+","+event.latLng.lng()+")\"><img src=\"/images/chiuso-per-lavori.png\" alt=\"chiuso per lavori\" /> Chiuso per lavori</a><br/><a href=\"#\" onclick=\"insertAvviso(4,"+event.latLng.lat()+","+event.latLng.lng()+")\"><img src=\"/images/pericolo.png\" alt=\"strada pericolo\" /> Pericolo</a><br/><a href=\"#\" onclick=\"insertAvviso(5,"+event.latLng.lat()+","+event.latLng.lng()+")\"><img src=\"/images/errore-mappa.png\" alt=\"errore mappa\" /> Errore mappa</a><p>"
+																																																											 content: "<h6 class=\"titlemap\"><strong>Segnalazione</strong></h6><p class=\"textmap\"><a href=\"#\" onclick=\"insertAvviso(event,1,"+event.latLng.lat()+","+event.latLng.lng()+")\"><img src=\"/images/strada-dissestata.png\" alt=\"strada dissestata\" /> Strada dissestata</a><br/><a href=\"#\" onclick=\"insertAvviso(event,2,"+event.latLng.lat()+","+event.latLng.lng()+")\"><img src=\"/images/traffico.png\" alt=\"traffico\" /> Zona trafficata</a><br/><a href=\"#\" onclick=\"insertAvviso(event,3,"+event.latLng.lat()+","+event.latLng.lng()+")\"><img src=\"/images/chiuso-per-lavori.png\" alt=\"chiuso per lavori\" /> Chiuso per lavori</a><br/><a href=\"#\" onclick=\"insertAvviso(event,4,"+event.latLng.lat()+","+event.latLng.lng()+")\"><img src=\"/images/pericolo.png\" alt=\"strada pericolo\" /> Pericolo</a><br/><a href=\"#\" onclick=\"insertAvviso(event,5,"+event.latLng.lat()+","+event.latLng.lng()+")\"><img src=\"/images/errore-mappa.png\" alt=\"errore mappa\" /> Errore mappa</a><p>"
 																																																										 });
 																																					if (infoWindowOpen) {
 																																						infoWindowOpen.close()
@@ -820,6 +842,7 @@ function initMapScheda() {
 						.fail(function(data) {
 								//in caso di errore nascondo la mappa
 								$("#map").hide()
+								$("#other-pins").hide()
 						})
 
 
@@ -870,9 +893,12 @@ function initMapScheda() {
 
 							})
 
-		//alert(flightPath.getPath())
-		//result.routes[0].overview_path -> da usare per caricare fontanelle, bar e ristoranti
-		//result.routes[0].legs[0].distance.value -> calcolare la distanza dei vari segmenti
+
+
+		/*retriveParking(slagPercorso[2])
+		retriveBar(slagPercorso[2])*/
+
+
 }
 
 function filtraCommentiChange(e) {
@@ -948,27 +974,92 @@ function formattazioneCommento(data,autore,commento,tappa) {
 
 	return html;
 }
+//******************************* GESTIONE ALERT **************************/
 
-function insertAvviso(n, lat, long) {
-	//1 Strada dissestata
-	//2 Zona trafficata
-	//3 chiuso per lavori
-	//4 Pericolo
-	//5 Errore centro
+//inserisco un alert
+function insertAvviso(e,n, lat, long) {
 
-	$.post("/private/api/json/segnalazioni/upload", {tipoSegnalazione: n, lat: lat, lng: long}, "json" )
+	e.preventDefault();
+
+	var url = (window.location.pathname).split("/")
+	var percorso = url[url.length-1];
+
+
+	$.post("/private/api/json/segnalazioni/upload", {tipoSegnalazione: n, lat: lat, lng: long, idPercorso: percorso}, "json" )
 				.done(function(data) {
-					//in
-					alert(data)
-				})
-				.fail(function(data) {
-					alert("error")
-				})
+
+					//inserire alert come marcatura
+					if (data['code']=="ok") {
+							//inserire alert come marcatura
+							addAlertMarker(mapHome,lat,long, n);
+					}
+
+				});
 
 				infoWindowOpen.close()
 
 
 }
+
+var alertMarker = null;
+
+function addAlertMarker(map,lat,lng, type) {
+	type+=2;
+	var img = pinMarker(type);
+
+
+	var marker = new google.maps.Marker({
+			position: {lat: lat, lng: lng},
+			map: map,
+			icon: img,
+			clickable: false
+		});
+
+
+}
+
+
+var alertCollection = null;
+//carico gli addAlertMarker
+function retriveAlert() {
+	var url = window.location.pathname ;
+	var slagPercorso = url.split("/")
+	var pulsanteAlert = $('#other-pins input[name="alert"]');
+	pulsanteAlert.change(toggleAlert)
+
+	$.getJSON('/private/api/json/segnalazioni/'+slagPercorso[2])
+						.done(function(data) {
+								if(data['code']==0 || data['code'] == 'error') {
+									return;
+								}
+
+								alertCollection = data
+
+							})
+}
+
+function toggleAlert() {
+	//alert("visualizza o non visualizza")
+
+		    if (this.checked) {
+						if (alertMarker == null) {
+							//carica da dati
+							$.each(alertCollection, function(key, value) {
+								addAlertMarker(mapHome, Number(value['coordinates'][0]), Number(value['coordinates'][1]), Number(value['data']['type']))
+							})
+							alert("alertMarker null")
+						} else {
+							//carica da alertMarket
+							alert("alertMarker non null")
+						}
+		    } else {
+						//rimuovi alertMarker
+						alert("deselezionato")
+		    }
+
+
+}
+
 
 function setCentroMappa() {
 	mapHome.setCenter(centroMappa)

@@ -1124,24 +1124,58 @@ app.post("/private/api/json/segnalazioni/upload", function(req,res) {
   var tipoSegnalazione = (req.body.tipoSegnalazione).trim();
   var lat = (req.body.lat).trim();
   var lng = (req.body.lng).trim();
+  var percorso = (req.body.idPercorso).trim()
 
-  if (isNaN(tipoSegnalazione) || isNaN(lat) || isNaN(lng) || tipoSegnalazione == null || lat==null || lng == null){
-    //Errore
+  if (isNaN(tipoSegnalazione) || isNaN(lat) || isNaN(lng) || tipoSegnalazione == null || lat==null || lng == null || percorso == null){
+    red.end(JSON.stringify({code: "error"}))
     //-> err
     return
   }
 
+  baDB.collection("alert").insert({type:"Point", coordinates: [lat,lng], data: {data: new Date(Date.now()), type: tipoSegnalazione, _idPercorso: percorso}}, function(err,result){
+                                                                                                                                                              res.header("Access-Control-Allow-Origin", "http://localhost:8080/");
+                                                                                                                                                              res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+                                                                                                                                                              res.setHeader('Content-Type', 'application/json');
 
-  //risposta
-  // -> msg = "ok"
-  // -> err
-  res.end("invia segnalazioni -> " + tipoSegnalazione)
+
+                                                                                                                                                              if(err) {
+                                                                                                                                                                  red.end(JSON.stringify({code: "error"}));
+                                                                                                                                                                  return
+                                                                                                                                                              }
+
+                                                                                                                                                                res.end(JSON.stringify({code: "ok"}))
+                                                                                                                                                          });
+
+
 })
 
 //download segnalazioni
-app.get("/private/api/json/segnalazioni/", function(req,res) {
+app.get("/private/api/json/segnalazioni/:slag_percorso", function(req,res) {
+  var idPercorso = req.params.slag_percorso;
 
-  res.end("download segnalazioni")
+  //carico gli alert specifici del percorsi
+  baDB.collection('alert').find({"data._idPercorso" : idPercorso}, {type:0, _id:0, "data.data":0, "data._idPercorso":0})
+                          .toArray(function(err, result) {
+                            res.header("Access-Control-Allow-Origin", "http://localhost:8080/");
+                            res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+                            res.setHeader('Content-Type', 'application/json');
+
+
+                            if (err) {
+                              res.end(JSON.stringify({code: "error"}));
+                              console.log("errore in json alert percorso " + idPercorso);
+                              return
+                            }
+
+                            if(result.length==0) {
+                                res.end(JSON.stringify({code: 0}));
+                                return
+                            }
+
+                              res.end(JSON.stringify(result));
+
+                          })
+
 })
 
 app.post("/private/api/json/commento/upload/", function(req,res) {
@@ -1214,6 +1248,11 @@ app.post("/private/api/json/commento/upload/", function(req,res) {
     }
 
   ],function (err, result) {
+    res.header("Access-Control-Allow-Origin", "http://localhost:8080/");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.setHeader('Content-Type', 'application/json');
+
+
     if(err) {
       console.log("errore inserimento commento ->" + err);
       res.end(JSON.stringify({code: 4}))
