@@ -452,9 +452,130 @@ var centroMappa = null;
 			order.change(attivaOrdinamento);
 		}
 
-		function attivaOrdinamento() {
-			alert("creare la funzione di ordinamento 1. disabilitare pulsanti 2. disabilitare visualizzazione 3. ordinare 4. riabilitare")
-		}
+		function attivaOrdinamento(e) {
+			//alert("creare la funzione di ordinamento 1. disabilitare pulsanti 2. disabilitare visualizzazione 3. ordinare 4. riabilitare")
+			var obj = $(e.target)
+			var articoli = $("#result article");
+
+
+			//rimuovo gli articoli
+			$('#result div article').remove()
+
+
+			var fsort = funzioneSort(obj.val());
+
+			//funzione di sort
+			articoli.sort(fsort)
+
+
+			//isnerisco gli articoli
+			$('#result div').html(articoli);
+			}
+//0 alfabetico Crescente
+//1 alfabetico decrescente
+//2 distanza Crescente
+//3 distanza decrescente
+//4 difficolta Crescente
+//5 difficolta Decrescente
+function funzioneSort(type) {
+	var freturn;
+
+	type= Number(type)
+
+	switch (type) {
+		case 0:
+						freturn=function(a,b) {
+							var tita = $(a).find("h3").text();
+							var titb = $(b).find("h3").text();
+
+							if (tita >= titb) {
+								return 1
+							} else {
+								return -1
+							}
+						}
+		break;
+		case 1:
+						freturn=function(a,b) {
+							var tita = $(a).find("h3").text();
+							var titb = $(b).find("h3").text();
+
+							if (tita <= titb) {
+								return 1
+							} else {
+								return -1
+							}
+						}
+		break;
+		case 2:
+					freturn=function(a,b) {
+
+						var datia = $(a).find("section strong");
+						var datib = $(b).find("section strong");
+
+						var lungha = parseFloat($(datia[0]).text())
+						var lunghb = parseFloat($(datib[0]).text())
+
+						if (lungha >= lunghb) {
+							return 1
+						} else {
+							return -1
+						}
+					}
+			break;
+			case 3:
+						freturn=function(a,b) {
+							var datia = $(a).find("section strong");
+							var datib = $(b).find("section strong");
+
+							var lungha = parseFloat($(datia[0]).text())
+							var lunghb = parseFloat($(datib[0]).text())
+
+							if (lungha >= lunghb) {
+								return -1
+							} else {
+								return 1
+							}
+						}
+				break;
+			case 4:
+						freturn=function(a,b) {
+							var datia = $(a).find("span.full");
+							var datib = $(b).find("span.full");
+
+							if (datia.length >= datib.length) {
+								return 1
+							}  else {
+								return -1
+							}
+						}
+				break;
+				case 5:
+							freturn=function(a,b) {
+								var datia = $(a).find("span.full");
+								var datib = $(b).find("span.full");
+
+								if (datia.length < datib.length) {
+									return 1
+								} else {
+									return -1
+								}
+							}
+					break;
+
+	}
+
+
+/*
+	lunghezza
+	var sezioni = $(articoli[0]).find("section strong")
+	 alert(parseFloat($(sezioni[0]).text()));
+
+	 var diff = $(articoli[0]).find("span.full")
+	 alert(diff.length)
+*/
+	return freturn
+}
 
 		function attivaFiltri() {
 			var queryRaw = window.location.search.substring(1);

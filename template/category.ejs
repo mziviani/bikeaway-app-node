@@ -30,12 +30,12 @@
               <select name="orderInput" id="orderInput" tabindex="1">
                                                       <option value="0">Alfabetico Crescente</option>
                                                       <option value="1">Alfabetico Decrescente</option>
-                                                      <option value="2">Distanza Crescente</option>
-                                                      <option value="3">Distanza Decrescente</option>
+                                                      <option value="2">Lunghezza Crescente</option>
+                                                      <option value="3">Lunghezza Decrescente</option>
                                                       <option value="4">Difficoltà Crescente</option>
                                                       <option value="5">Difficoltà Decrescente</option>
-                                                      <option value="6">Vicini > distanti</option>
-                                                      <option value="7">distanti > vicini</option>
+                                                    <!--  <option value="6">Vicini > distanti</option>
+                                                      <option value="7">distanti > vicini</option>-->
                                                     </select>
             </section>
 
@@ -99,7 +99,7 @@
           </section>
 
           <!-- cambirrae in col-sm-10 -->
-        <article class="col-sm-9 col-sm-pull-3">
+        <article class="col-sm-9 col-sm-pull-3" id="result">
             <div class="row">
               <% percorsiObj[0]['percorsi'].forEach(function percorsi(obj) {%>
                 <article class="col-sm-6 percorso" data-bambini="<%= obj.scheda.bambini %>" data-lan="<%= obj.coordinates[0][0] %>" data-lon="<%= obj.coordinates[0][1] %>">

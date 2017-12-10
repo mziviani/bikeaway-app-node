@@ -147,6 +147,12 @@ app.get("/cerca", function(req,res) {
 
                                                              }
 
+                                                      },
+                                                      {
+                                                        $sort: {
+                                                              "scheda.title": 1
+                                                        }
+
                                                       }
 
                                                   ]).toArray(function(err,result) {
@@ -180,6 +186,12 @@ app.get("/cerca", function(req,res) {
                                                                           as: "categoria"
 
                                                                    }
+
+                                                            },
+                                                            {
+                                                              $sort: {
+                                                                    "scheda.title": 1
+                                                              }
 
                                                             }
 
