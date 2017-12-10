@@ -10,6 +10,7 @@ var cookieParser = require('cookie-parser');
 var striptags = require('striptags');
 var bodyParser = require('body-parser');
 var akismet = require('akismet-api');
+var CronJob = require('cron').CronJob;
 
 
 
@@ -1121,9 +1122,9 @@ app.get("/private/api/json/category/:slag_category", function(req,res) {
 
 //upload segnalazioni
 app.post("/private/api/json/segnalazioni/upload", function(req,res) {
-  var tipoSegnalazione = (req.body.tipoSegnalazione).trim();
-  var lat = (req.body.lat).trim();
-  var lng = (req.body.lng).trim();
+  var tipoSegnalazione = Number((req.body.tipoSegnalazione).trim());
+  var lat = Number((req.body.lat).trim());
+  var lng = Number((req.body.lng).trim());
   var percorso = (req.body.idPercorso).trim()
 
   if (isNaN(tipoSegnalazione) || isNaN(lat) || isNaN(lng) || tipoSegnalazione == null || lat==null || lng == null || percorso == null){
@@ -1132,7 +1133,7 @@ app.post("/private/api/json/segnalazioni/upload", function(req,res) {
     return
   }
 
-  baDB.collection("alert").insert({type:"Point", coordinates: [Number(lat),Number(lng)], data: {data: new Date(Date.now()), type: tipoSegnalazione, _idPercorso: percorso}}, function(err,result){
+  baDB.collection("alert").insert({type:"Point", coordinates: [lat,lng], data: {data: new Date(Date.now()), type: tipoSegnalazione, _idPercorso: percorso}}, function(err,result){
                                                                                                                                                               res.header("Access-Control-Allow-Origin", "http://localhost:8080/");
                                                                                                                                                               res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
                                                                                                                                                               res.setHeader('Content-Type', 'application/json');
@@ -1178,12 +1179,43 @@ app.get("/private/api/json/segnalazioni/:slag_percorso", function(req,res) {
 
 })
 
+//download attivita bar e parcheggi
+app.get("/private/api/json/attivita/:slag_percorso", function(req,res) {
+  var idPercorso = req.params.slag_percorso;
+
+  //carico gli alert specifici del percorsi
+  baDB.collection('parcheggi').find({"_idPercorso" : idPercorso}, {_id:0, "_idPercorso":0, "location.type":0})
+                          .toArray(function(err, result) {
+                            res.header("Access-Control-Allow-Origin", "http://localhost:8080/");
+                            res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+                            res.setHeader('Content-Type', 'application/json');
+
+
+                            if (err) {
+                              res.end(JSON.stringify({code: "error"}));
+                              console.log("errore in json alert percorso " + idPercorso);
+                              return
+                            }
+
+                            if(result.length==0) {
+                                res.end(JSON.stringify({code: 0}));
+                                return
+                            }
+
+                              res.end(JSON.stringify(result));
+
+                          })
+
+})
+
+
+
 app.post("/private/api/json/commento/upload/", function(req,res) {
   var autore = (req.body.autore).trim();
   var idPercorso = (req.body._idPercorso).trim();
   var mail = (req.body.mail).trim();
   var commento = (req.body.commento).trim();
-  var tappa = (req.body.tappa).trim();
+  var tappa = Number((req.body.tappa).trim());
   var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
   var headers = req.header['user-agent'];
   var data = new Date(Date.now());
@@ -1334,16 +1366,23 @@ app.get("*", function(req,res) {
     res.redirect("/404");
 })
 
+//cronjop per eliminare gli alert ogni 60 gg
+//alle 2 di ogni notte pulizia degli alert più vecchi di 60 gg
+new CronJob('00 00 02 * * *', function() {
+  var dataAttuale = new Date(Date.now())
+  var data60gg = new Date(dataAttuale-(24*60*60*1000*60))
+
+   baDB.collection("alert").remove({"data.data": {$lt: data60gg}})
+
+  console.log("Pulizia degli alert minori del " + data60gg);
+}, null, true);
 
 
 //to do
-// -> cron job per avvisi
-// ralizzare la parte di avvisi
 // -> parte amministrativa ? (no)
 //realizzare pagine statiche (contatti, help center ecc...)
 // realizzare redirect /505
 // api mailchimp
-// api akismet
 // sistemare filtering con javascript
 //sistemre il filtro della scheda sul cellulare
 

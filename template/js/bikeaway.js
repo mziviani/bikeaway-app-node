@@ -556,9 +556,11 @@ var centroMappa = null;
 			//azione per l'invio del campiCommento
 			$('#commenti #areaInserimento input[value="inserisci"]').click(inserisciCommento);
 
-			//carico
 			//carico gli alert
 			retriveAlert()
+
+			//carico i attivita
+			retriveAttivita()
 
 		}
 
@@ -752,8 +754,8 @@ function initMapScheda() {
 									} else  {
 
 										/*addMarker(mapHome,value[0],value[1],data[0]['scheda']['tappe'][key][1],2,tappa);
-										tappa++*/
-
+										tappa++
+										*/
 
 										wayout.push({
 																location: new google.maps.LatLng({lat: value[0], lng: value[1]}),
@@ -831,6 +833,14 @@ function initMapScheda() {
 													//imposto lazione di ricentraggio della mappa in caso di resize
 												 addEventCentroMappa()
 
+
+												 //da elimminare
+												 mapHome.addListener('click', function(event) {
+
+																							 alert(event.latLng.lat()+" "+event.latLng.lng());
+
+																			 });
+
 									    }
 									});
 
@@ -892,12 +902,6 @@ function initMapScheda() {
 
 
 							})
-
-
-
-		/*retriveParking(slagPercorso[2])
-		retriveBar(slagPercorso[2])*/
-
 
 }
 
@@ -974,7 +978,14 @@ function formattazioneCommento(data,autore,commento,tappa) {
 
 	return html;
 }
+
 //******************************* GESTIONE ALERT **************************/
+//array con maker di google maps
+var alertMarker = [];
+//dati raw
+var alertCollection = null;
+//N alert
+var nAlert = 0
 
 //inserisco un alert
 function insertAvviso(e,n, lat, long) {
@@ -992,6 +1003,11 @@ function insertAvviso(e,n, lat, long) {
 					if (data['code']=="ok") {
 							//inserire alert come marcatura
 							addAlertMarker(mapHome,lat,long, n);
+
+							//incremento gli alert
+							nAlert++
+							visualizzaNalert()
+
 					}
 
 				});
@@ -1001,7 +1017,6 @@ function insertAvviso(e,n, lat, long) {
 
 }
 
-var alertMarker = null;
 
 function addAlertMarker(map,lat,lng, type) {
 	type+=2;
@@ -1015,11 +1030,13 @@ function addAlertMarker(map,lat,lng, type) {
 			clickable: false
 		});
 
+	//inserisco il marker nell'array
+	alertMarker.push(marker);
 
 }
 
 
-var alertCollection = null;
+
 //carico gli addAlertMarker
 function retriveAlert() {
 	var url = window.location.pathname ;
@@ -1030,11 +1047,13 @@ function retriveAlert() {
 	$.getJSON('/private/api/json/segnalazioni/'+slagPercorso[2])
 						.done(function(data) {
 								if(data['code']==0 || data['code'] == 'error') {
+									visualizzaNalert()
 									return;
 								}
 
 								alertCollection = data
-
+								nAlert= data.length
+								visualizzaNalert();
 							})
 }
 
@@ -1042,25 +1061,140 @@ function toggleAlert() {
 	//alert("visualizza o non visualizza")
 
 		    if (this.checked) {
-						if (alertMarker == null) {
-							//carica da dati
-							$.each(alertCollection, function(key, value) {
-								addAlertMarker(mapHome, Number(value['coordinates'][0]), Number(value['coordinates'][1]), Number(value['data']['type']))
-							})
-							alert("alertMarker null")
-						} else {
-							//carica da alertMarket
-							alert("alertMarker non null")
+						if (alertCollection==null) {
+								$.each(alertMarker, function(key, value) {
+										//inserisco i marker all'interno della mappa
+										value.setMap(mapHome);
+								})
+						} else if(alertCollection!= null) {
+								$.each(alertCollection, function(key,value) {
+											addAlertMarker(mapHome, value['coordinates'][0], value['coordinates'][1], value['data']['type']);
+								})
+
+								alertCollection = null
 						}
+
 		    } else {
-						//rimuovi alertMarker
-						alert("deselezionato")
+					$.each(alertMarker, function(key, value) {
+							//inserisco i marker all'interno della mappa
+							value.setMap(null);
+					})
 		    }
+}
+
+function visualizzaNalert() {
+	var label = $('#other-pins #alert span')
+	label.text("("+nAlert+")")
+}
+
+//******************************* GESTIONE ATTIVITA **************************/
+//array con maker di google maps
+var parcheggiMarker = [];
+var barMarker = [];
+
+//n parcheggi e bar
+var nParcheggi = 0
+var nBar = 0
+
+function retriveAttivita() {
+	var url = window.location.pathname ;
+	var slagPercorso = url.split("/")
+	var pulsanteParcheggi = $('#other-pins input[name="parcheggi"]');
+	pulsanteParcheggi.change(toggleParcheggi)
+
+	var pulsanteBar = $('#other-pins input[name="bar"]');
+	pulsanteBar.change(toggleBar)
+
+	$.getJSON('/private/api/json/attivita/'+slagPercorso[2])
+						.done(function(data) {
+								if(data['code']==0 || data['code'] == 'error') {
+									visualizzaNattivita()
+									return;
+								}
+
+								$.each(data, function(key, value) {
+									var icona = null;
+
+
+									if(value['attivita']=='bar') {
+										nBar++
+										icona = pinMarker(1);
+
+										var marker = new google.maps.Marker({
+												position: {lat: value['location']['coordinates'][0], lng: value['location']['coordinates'][1]},
+												icon: icona,
+												clickable: false
+											});
+
+										barMarker.push(marker)
+
+
+									} else if (value['attivita']=='parcheggio') {
+										nParcheggi++
+										icona = pinMarker(2);
+
+										var marker = new google.maps.Marker({
+												position: {lat: value['location']['coordinates'][0], lng: value['location']['coordinates'][1]},
+												icon: icona,
+												clickable: false
+											});
+
+										parcheggiMarker.push(marker)
+									}
+
+
+
+								})
+
+
+								visualizzaNattivita()
+
+							})
+}
+
+function visualizzaNattivita() {
+	var label = $('#other-pins #parking span')
+	label.text("("+nParcheggi+")")
+
+	var label2 = $('#other-pins #bar span')
+	label2.text("("+nBar+")")
+
+}
+
+
+function toggleParcheggi() {
+		   if (this.checked) {
+								$.each(parcheggiMarker, function(key, value) {
+										//inserisco i marker all'interno della mappa
+										value.setMap(mapHome);
+								})
+
+		    } else {
+					$.each(parcheggiMarker, function(key, value) {
+							value.setMap(null);
+					})
+		    }
+}
+
+function toggleBar() {
+		if (this.checked) {
+	 					$.each(barMarker, function(key, value) {
+	 							//inserisco i marker all'interno della mappa
+	 							value.setMap(mapHome);
+	 					})
+
+	 	} else {
+	 		$.each(barMarker, function(key, value) {
+	 				value.setMap(null);
+	 		})
+	 	}
 
 
 }
 
 
+
+/********************** ALTRO *******************/
 function setCentroMappa() {
 	mapHome.setCenter(centroMappa)
 }
