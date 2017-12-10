@@ -448,12 +448,11 @@ var centroMappa = null;
 			var btnfiltri = $('#filter button');
 			var order = $('#order #orderInput');
 
-			btnfiltri.click(attivaFiltri);
+			btnfiltri.click(gestisciFiltri);
 			order.change(attivaOrdinamento);
 		}
 
 		function attivaOrdinamento(e) {
-			//alert("creare la funzione di ordinamento 1. disabilitare pulsanti 2. disabilitare visualizzazione 3. ordinare 4. riabilitare")
 			var obj = $(e.target)
 			var articoli = $("#result article");
 
@@ -565,19 +564,10 @@ function funzioneSort(type) {
 
 	}
 
-
-/*
-	lunghezza
-	var sezioni = $(articoli[0]).find("section strong")
-	 alert(parseFloat($(sezioni[0]).text()));
-
-	 var diff = $(articoli[0]).find("span.full")
-	 alert(diff.length)
-*/
 	return freturn
 }
 
-		function attivaFiltri() {
+		function gestisciFiltri() {
 			var queryRaw = window.location.search.substring(1);
 			var queryObj = null;
 
@@ -590,6 +580,7 @@ function funzioneSort(type) {
 			if (queryRaw.length>0 && queryRaw.indexOf("=")>-1) {
 					queryObj = $.parseJSON('{"' + decodeURI(queryRaw).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}')
 			}
+
 			if(queryObj!= null) {
 
 				if (queryObj.lung != inputLung.val() && inputLung.val().trim() != '') {
@@ -612,17 +603,7 @@ function funzioneSort(type) {
 						queryObj.diff =selectDifficolta.val().trim();
 				}
 
-
 				switch (inputCheckbox[0].checked) {
-					case true:
-							queryObj.vicino=1;
-						break;
-					case false:
-						queryObj.vicino=0;
-					break;
-				}
-
-				switch (inputCheckbox[1].checked) {
 					case true:
 							queryObj.bambini=1;
 						break;
@@ -631,10 +612,7 @@ function funzioneSort(type) {
 					break;
 				}
 
-
-
-
-			} else {
+			}else {
 
 				queryObj = new Object();
 
@@ -648,24 +626,122 @@ function funzioneSort(type) {
 					queryObj.type = selectStrada.val();
 					queryObj.diff = selectDifficolta.val();
 
-				if (inputCheckbox[1].checked) {
+				if (inputCheckbox[0].checked) {
 					queryObj.bambini = 1;
 				} else {
 					queryObj.bambini = 0;
 				}
-
-				if (inputCheckbox[0].checked) {
-					queryObj.vicino = 1;
-				}	else {
-					queryObj.vicino = 0;
-				}
 			}
-
 
 			//cambio url
 			window.history.pushState({}, window.document.title, "?"+$.param(queryObj));
+
+			attivaFiltro()
 		}
 
+function attivaFiltro() {
+	var inputLung = $("#lung");
+	var inputPend = $("#pend");
+	var selectStrada = $("#type");
+	var selectDifficolta = $("#diff");
+	var inputCheckbox = $("#filter input[type='checkbox']");
+
+	var inputLungVal = parseFloat(inputLung.val());
+	var inputPendVal = parseFloat(inputPend.val())
+
+	var articoli = $("#result article");
+	var nArticoli = $("#result article").length
+
+	//1 visualizza tutti
+	articoli.show();
+	// rimuovo eventuali messaggi precedenti
+	$("#msgResult").remove()
+
+	if (!isNaN(inputLungVal)) {
+		$.each(articoli, function(key, value) {
+						var strongArticoli = $(value).find("section strong");
+						var lunghezza = parseFloat($(strongArticoli[0]).text())
+
+						if (lunghezza > inputLungVal ) {
+							$(value).hide();
+						}
+
+
+		})
+	}
+
+	//2 ricarico glli articoli visibili
+	articoli = $("#result article:visible");
+
+	if (!isNaN(inputPendVal)) {
+		$.each(articoli, function(key, value) {
+						var strongArticoli = $(value).find("section strong");
+						var pendenza = parseFloat($(strongArticoli[2]).text())
+
+						if (pendenza > inputPendVal) {
+							$(value).hide();
+						}
+
+
+		})
+	}
+
+	//3 ricarico gli articoli visibili
+	articoli = $("#result article:visible");
+	var tipoStrada = ["", "asfalto", "terra", "ghiaia", "misto"]
+
+	if (selectStrada.val()!=0) {
+		$.each(articoli, function(key, value) {
+						var strongArticoli = $(value).find("section strong");
+						var strada = $(strongArticoli[3]).text().trim()
+
+						if (strada != tipoStrada[selectStrada.val()]) {
+							$(value).hide();
+						}
+
+
+		})
+	}
+
+	//4 ricarico gli articoli visibili
+	articoli = $("#result article:visible");
+	var difficolta = [0, 1,2,3];
+
+	if (selectDifficolta.val()!=0) {
+		$.each(articoli, function(key, value) {
+						var diff = $(value).find("span.full");
+
+						if (diff.length!=selectDifficolta.val()) {
+							$(value).hide();
+						}
+
+
+		})
+	}
+
+	//5 ricarico gli articoli visibili
+	articoli = $("#result article:visible");
+
+	if(inputCheckbox[0].checked) {
+		$.each(articoli, function(key, value) {
+						var bambini = $(value).data("bambini");
+
+						if (bambini!=true) {
+							$(value).hide();
+						}
+		})
+	}
+
+	var nArticoliVisibili = $("#result article:visible").length
+
+	if(nArticoli-nArticoliVisibili== nArticoli) {
+		alert("nessun articolo visibile")
+		$("<h2 id=\"msgResult\">Nessun risultato per i filtri impostati</h2>").insertAfter("#result div")
+	}
+
+	alert("da sistemare l'inserimento del messaggio")
+
+}
 //******* scheda *******//
 		function initScheda() {
 
