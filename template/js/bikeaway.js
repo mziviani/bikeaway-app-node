@@ -289,6 +289,12 @@ var centroMappa = null;
 				case 7:
 						img='errore-mappa.png'
 				break;
+				case 8:
+						img='parcheggio.png'
+				break;
+				case 9:
+						img='bar.png'
+				break;
 			 default:
 					 img='pinhome.png'
 			}
@@ -359,7 +365,7 @@ var centroMappa = null;
 																 infoWindowOpen = infowindow;
 															 });
 
-
+				return marker;
 		}
 
 
@@ -367,6 +373,9 @@ var centroMappa = null;
 
 
 		 /********* category map *****/
+		 //variabile globale per i filitri
+		 var pinMapCategory = [];
+
 		 function initMapCategory() {
 			var idcategory = window.location.pathname;
 			var search = window.location.search;
@@ -416,7 +425,7 @@ var centroMappa = null;
 
 
 																								 $.each(data, function(key,val) {
-																									 addMarkerNoLabel(mapHome,val['coordinates'][0][0],val['coordinates'][0][1], val['scheda'],val['categoria'][0]['title'], val['_id'],val['categoria'][0]['_id'])
+																									 pinMapCategory[val['_id']] = (addMarkerNoLabel(mapHome,val['coordinates'][0][0],val['coordinates'][0][1], val['scheda'],val['categoria'][0]['title'], val['_id'],val['categoria'][0]['_id']))
 																									 bounds.extend(new google.maps.LatLng(val['coordinates'][0][0],val['coordinates'][0][1]));
 
 																								 })
@@ -441,7 +450,6 @@ var centroMappa = null;
 																						 })
 
 
-
 		 }
 
 		function initCategory() {
@@ -450,6 +458,55 @@ var centroMappa = null;
 
 			btnfiltri.click(gestisciFiltri);
 			order.change(attivaOrdinamento);
+
+			//verifico se ci sono dei filtri url attivi
+			attivaFiltriOnLoad()
+		}
+
+		function attivaFiltriOnLoad() {
+			var queryRaw = window.location.search.substring(1);
+			var queryObj = null;
+			var flagLauch = false
+
+			var inputLung = $("#lung");
+			var inputPend = $("#pend");
+			var selectStrada = $("#type");
+			var selectDifficolta = $("#diff");
+			var inputCheckbox = $("#filter input[type='checkbox']");
+
+			if (queryRaw.length>0 && queryRaw.indexOf("=")>-1) {
+					queryObj = $.parseJSON('{"' + decodeURI(queryRaw).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}')
+			}
+
+			if (queryObj.lung!=null && !isNaN(parseFloat(queryObj.lung)) && parseFloat(queryObj.lung) != 0) {
+				inputLung.val(parseFloat(queryObj.lung))
+				flagLauch = true
+			}
+
+			if (queryObj.pend!=null && !isNaN(parseFloat(queryObj.pend))) {
+				inputPend.val(parseFloat(queryObj.pend))
+				flagLauch = true
+			}
+
+			if (queryObj.type!=null && !isNaN(parseFloat(queryObj.type)) && parseFloat(queryObj.type) >=0 && parseFloat(queryObj.type)<= 4) {
+				selectStrada.val(parseFloat(queryObj.type))
+				flagLauch = true
+			}
+
+			if (queryObj.diff!=null && !isNaN(parseFloat(queryObj.diff)) && parseFloat(queryObj.diff) >=0 && parseFloat(queryObj.diff)<= 3) {
+				selectDifficolta.val(parseFloat(queryObj.diff))
+				flagLauch = true
+			}
+
+			if (queryObj.bambini!=null && !isNaN(parseFloat(queryObj.bambini)) && parseFloat(queryObj.bambini)== 1) {
+				$(inputCheckbox[0]).prop('checked', true);
+				flagLauch = true
+			}
+
+			if (flagLauch==true) {
+				attivaFiltro()
+			}
+
 		}
 
 		function attivaOrdinamento(e) {
@@ -468,8 +525,10 @@ var centroMappa = null;
 
 
 			//isnerisco gli articoli
-			$('#result div').html(articoli);
+			//$('#result div').html(articoli);
+			$(articoli).appendTo("#result div")
 			}
+
 //0 alfabetico Crescente
 //1 alfabetico decrescente
 //2 distanza Crescente
@@ -583,14 +642,16 @@ function funzioneSort(type) {
 
 			if(queryObj!= null) {
 
-				if (queryObj.lung != inputLung.val() && inputLung.val().trim() != '') {
+				if (queryObj.lung != inputLung.val() && inputLung.val().trim() != '') { {
 						queryObj.lung =inputLung.val().trim();
-				} else if ((inputLung.val().trim() == '' || inputLung.val() == null) && queryObj.lung != null) {
+
+				} } else if ((inputLung.val().trim() == '' || inputLung.val() == null) && queryObj.lung != null) {
 					delete queryObj.lung;
 				}
 
 				if (queryObj.pend != inputPend.val() && inputPend.val().trim() != '') {
 						queryObj.pend =inputPend.val().trim();
+
 				} else if ((inputPend.val().trim() == '' || inputPend.val() == null) && queryObj.pend != null) {
 					delete queryObj.pend;
 				}
@@ -639,6 +700,8 @@ function funzioneSort(type) {
 			attivaFiltro()
 		}
 
+
+
 function attivaFiltro() {
 	var inputLung = $("#lung");
 	var inputPend = $("#pend");
@@ -652,8 +715,15 @@ function attivaFiltro() {
 	var articoli = $("#result article");
 	var nArticoli = $("#result article").length
 
-	//1 visualizza tutti
+	//1 visualizza tutti i percorsi
 	articoli.show();
+
+	//visualizzo tutti i pin
+	$.each(articoli, function(key,value) {
+		var id = $(value).data("id");
+		pinMapCategory[id].setMap(mapHome)
+	})
+
 	// rimuovo eventuali messaggi precedenti
 	$("#msgResult").remove()
 
@@ -734,12 +804,28 @@ function attivaFiltro() {
 
 	var nArticoliVisibili = $("#result article:visible").length
 
-	if(nArticoli-nArticoliVisibili== nArticoli) {
-		alert("nessun articolo visibile")
-		$("<h2 id=\"msgResult\">Nessun risultato per i filtri impostati</h2>").insertAfter("#result div")
+	if(nArticoli-nArticoliVisibili==nArticoli && nArticoli>0) {
+		var a = $("#result div.row:nth-child(1)");
+		$("<div id=\"msgResult\" class=\"col-md-12\"><h2 id=\"msgResult\">Nessun risultato per i filtri impostati</h2></div>").prependTo(a[0]);
+
+		articoli = $("#result article");
+		//nascondere tutti i pin della mappa
+		$.each(articoli, function(key,value) {
+			var id = $(value).data("id");
+			pinMapCategory[id].setMap(null)
+		})
+		return;
 	}
 
-	alert("da sistemare l'inserimento del messaggio")
+	//carico gli id degli articoli non visibili e li nascondo nella mappa
+	var nArticoliNonVisibili = $("#result article:hidden");
+
+	$.each(nArticoliNonVisibili, function(key, value) {
+			var id = $(value).data("id");
+			pinMapCategory[id].setMap(null);
+	})
+
+
 
 }
 //******* scheda *******//
@@ -1315,7 +1401,7 @@ function retriveAttivita() {
 
 									if(value['attivita']=='bar') {
 										nBar++
-										icona = pinMarker(1);
+										icona = pinMarker(9);
 
 										var marker = new google.maps.Marker({
 												position: {lat: value['location']['coordinates'][0], lng: value['location']['coordinates'][1]},
@@ -1328,7 +1414,7 @@ function retriveAttivita() {
 
 									} else if (value['attivita']=='parcheggio') {
 										nParcheggi++
-										icona = pinMarker(2);
+										icona = pinMarker(8);
 
 										var marker = new google.maps.Marker({
 												position: {lat: value['location']['coordinates'][0], lng: value['location']['coordinates'][1]},

@@ -1116,6 +1116,10 @@ app.get("/private/api/json/category/:slag_category", function(req,res) {
                                                                         'categoria._id':idCategory
                                                                       }
                                                        },
+                                                       { $sort: {
+                                                                 "scheda.title":1
+                                                                 }
+                                                       }
                                              ]).toArray(function(err,result) {
                                                res.header("Access-Control-Allow-Origin", "http://localhost:8080/");
                                                res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
