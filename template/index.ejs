@@ -119,7 +119,7 @@
                 </header>
               </div>
               <% tabindex++; obj['percorsi'].forEach(function percorsi(objPercorso) {%>
-                <article class="col-sm-4 percorso" >
+                <article class="col-sm-4 percorso" data-lat="<%= objPercorso['coordinates'][0][0]%>" data-lng="<%= objPercorso['coordinates'][0][1]%>" >
                   <a href="/<%= objPercorso['scheda']['_idcategory'] + '/' + objPercorso['_id'] %>" tabindex="<%= tabindex %>">
                     <h4><%= objPercorso['scheda']['title'] %></h4>
                       <section>

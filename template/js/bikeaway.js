@@ -15,9 +15,10 @@ var resizeAction;
 //inizializzazione larghezza barra ricerca avanzata
 function initLarghezzaSearch() {
 	resizeLarghezzaSearch();
-	$(window).resize(function() {clearTimeout(resizeAction);
-															resizeAction = setTimeout(resizeLarghezzaSearch, 150);
-															});
+	$(window).resize(function() {
+															setTimeout(resizeLarghezzaSearch, 150);
+														});
+
 	//botton filtri avanzati
 	$('#search-advanced-view a:nth-child(1)').click(visualizzaFiltriAvanzati);
 
@@ -27,19 +28,25 @@ function initLarghezzaSearch() {
 function resizeLarghezzaSearch() {
 		var sao = $('#search-advanced-options');
 
+		//azzero i filitri
+		sao.removeAttr('style');
+
+		var larghezza = $('#search-field #search-field-group').outerWidth();
+		larghezza += $('#search-field input[type="submit"]').outerWidth();
+
 		if(!windowMobile()){
-			var larghezza = $('#search-field #search-field-group').outerWidth();
-			larghezza += $('#search-field input[type="submit"]').outerWidth();
-			larghezza += 40;
+			larghezza+=40;
+		}
+			//larghezza += 40;
 			sao.attr('style', 'width:'+larghezza+'px;'+sao.attr('style'));
 
-		} else {
-			sao.removeAttr('style');
-		}
 }
 
 //set visibilità ed etichetta filtri avanzati
 function visualizzaFiltriAvanzati() {
+	//ricalcolo la larghezza sumobile
+	resizeLarghezzaSearch()
+
 	var sao = $('#search-advanced-options');
 	var a = $('#search-advanced-view a:nth-child(1)');
 	var span = $('#search-advanced-view a:nth-child(1) span');
@@ -168,7 +175,8 @@ function setVelocita(vel) {
 	$('#velocita').val(velocitaDaUsare);
 
 }
-
+//gps attivo
+var gpsAPI = false
 //gestione mappa home
 var mapHome;
 
@@ -193,6 +201,7 @@ var centroMappa = null;
 		function setLatLngDefault(position) {
 			 latDefault = position.coords.latitude;
 			 lngDefault = position.coords.longitude;
+			 gpsAPI = true;
 			 setMapHome();
 		 }
 
@@ -242,11 +251,16 @@ var centroMappa = null;
 																										bounds.extend(new google.maps.LatLng(val['coordinates'][0][0],val['coordinates'][0][1]));
 																									})
 
+																									//se l'api è attiva ricalcolo il ridimensionamento
+																									if(gpsAPI==true) {
+																										bounds.extend(new google.maps.LatLng(latDefault,lngDefault));
+																									}
+
 																									//autozoom mappa
  																								 mapHome.fitBounds(bounds);
 
 																								 //mermorizzo il centro della centroMappa
-																								 centroMappa = mapHome.getCenter();
+																								 	centroMappa = mapHome.getCenter();
 
 																								 //imposto lazione di ricentraggio della mappa in caso di resize
 																								addEventCentroMappa()
@@ -258,12 +272,47 @@ var centroMappa = null;
 																							})
 
 
+				//se l'api gps è stata attivata inserisco l'omino e calcolo le distanze dal punto
+				if(gpsAPI==true) {
+				//	addMarker(mapHome,latDefault,lngDefault,null,10,null)
 
 
+						var img = pinMarker(10);
+
+						var marker = new google.maps.Marker({
+							position: {lat: latDefault, lng: lngDefault},
+							map: mapHome,
+							icon: img,
+							clickable: false
+						});
+
+					definisciDistanzePercorsoGPS(latDefault,lngDefault)
+				}
 
 
 		 }
+//calcolo distanze gps
 
+function definisciDistanzePercorsoGPS(lat,long) {
+	//carico gli articoli
+	var articoli = $("#percorsi article.percorso")
+
+	$.each(articoli, function(key,value) {
+			var latArt = $(value).data("lat");
+			var lngArt = $(value).data("lng");
+
+			var latRAD = (lat*2*Math.PI)/360;
+			var longRAD= (long*2*Math.PI)/360;
+			var latArtRAD= (latArt*2*Math.PI)/360;
+			var lngArtRAD= (lngArt*2*Math.PI)/360;;
+
+			var distanza = 6372.795477598 * Math.acos(Math.sin(latArtRAD)*Math.sin(latRAD)+Math.cos(latArtRAD)*Math.cos(latRAD)*Math.cos(longRAD-lngArtRAD))
+ 			var distanzaRound = (Math.round(distanza*10)/10)
+			$('<div class="col-md-12"><img src="/images/gps.png" alt="distanza"/> '+distanzaRound+' Km</div>').appendTo(value)
+	})
+	//$('<div class="col-md-12">ciao</div>').appendTo(articoli)
+	//alert("ricalcolo")
+}
 			//immagine pin
 		 function pinMarker(type) {
 			 var img
@@ -294,6 +343,9 @@ var centroMappa = null;
 				break;
 				case 9:
 						img='bar.png'
+				break;
+				case 10:
+						img='gps.png'
 				break;
 			 default:
 					 img='pinhome.png'
