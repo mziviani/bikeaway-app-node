@@ -25,7 +25,7 @@
                   <% } %>-->
 
                 </div>
-                <input type="submit" value="cerca percorso" tabindex="16">
+                <input type="submit" value="cerca percorso" tabindex="11">
                 <div id="search-advanced-view">
                   <a href="#" tabindex="5"><span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span></a>
                  <!-- ricerca avanzata opzioni *larghezza da calcolare in javascript*-->
@@ -34,6 +34,9 @@
                           <h6>Caratteristiche</h6>
                           <label for="lung">lunghezza max.</label><input type="text" name="lung" id="lung" tabindex="6" placeholder="Km" pattern="[0-9]+{0,3}" maxlength="3"/><br/>
                           <label for="pend">pendenza max.</label><input type="text" name="pend" id="pend" tabindex="7" placeholder="%" pattern="[0-9]+{0,3}" maxlength="3"  /><br/>
+
+                        </div>
+                        <div class="col-sm-4">
                           <label for="type">tipo di strada</label><select name="type" id="type" tabindex="8">
                                                                     <option value="0">tutte</option>
                                                                     <option value="1">asfalto</option>
@@ -48,15 +51,12 @@
                                                                     <option value="3">***</option>
                                                                   </select><br/>
                         </div>
-                        <div class="col-sm-4 col-sm-push-0 col-xs-6 col-xs-push-6">
-                          <label><input type="checkbox" name="vicino" value="1" tabindex="10" />vicino a me</label><br />
-                          <label><input type="checkbox" name="bambini" value="1" tabindex="11"  />adatto ai bambini</label><br/>
-                        </div>
-                        <div class="col-sm-4 col-sm-pull-0 col-xs-6 col-xs-pull-6">
-                          <h6>Categorie</h6>
+                       <div class="col-sm-4">
+                      <!--    <h6>Categorie</h6>
                           <% var tabindex = 12; categoryObj.forEach(function category(obj) {%>
                           <label><input type="checkbox" name="cat" value="<%=obj._id%>" tabindex="<%= tabindex %>" /> <%=obj.title%></label><br />
-                          <% tabindex++ }) %>
+                          <% tabindex++ }) %>-->
+                          <label><input type="checkbox" name="bambini" value="1" tabindex="10"  />adatto ai bambini</label><br/>
 
                         </div>
                     </div>
@@ -70,12 +70,12 @@
 
       <% if (highlightObj != null) {%>
           <div class="background-yellow">
-              <section class="container">
+              <section class="container" id="evidenza">
                 <header class="col-sm-12">
                   <h2>In evidenza</h2>
                 </header>
 
-                  <% highlightObj.forEach(function hightlight(hObj) {%>
+                  <% var tabindex = 12; highlightObj.forEach(function hightlight(hObj) {%>
                 <section class="col-sm-4 percorso highlight">
                   <a href="/<%= hObj['categoria'][0]['_id'] + '/' + hObj['_id'] %>"  tabindex="<%= tabindex %>">
                     <h3><%= hObj['scheda']['title'] %></h3>

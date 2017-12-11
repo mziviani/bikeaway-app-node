@@ -195,12 +195,15 @@ body {
   background-position: center center;
   background-repeat: no-repeat;
 }
-#search #search-field #search-advanced-view #search-advanced-options div:nth-child(1) label {
+#search #search-field #search-advanced-view #search-advanced-options div:nth-child(1) label,
+#search #search-field #search-advanced-view #search-advanced-options div:nth-child(2) label {
   width: 65%;
   display: inline-block;
 }
 #search #search-field #search-advanced-view #search-advanced-options div:nth-child(1) input[type='text'],
-#search #search-field #search-advanced-view #search-advanced-options div:nth-child(1) select {
+#search #search-field #search-advanced-view #search-advanced-options div:nth-child(1) select,
+#search #search-field #search-advanced-view #search-advanced-options div:nth-child(2) input[type='text'],
+#search #search-field #search-advanced-view #search-advanced-options div:nth-child(2) select  {
   width: 35%;
   height: 20px;
   color: #000;
@@ -214,7 +217,8 @@ body {
   border-width: 0px;
   background-color: #fff;
 }
-#search #search-field #search-advanced-view #search-advanced-options div:nth-child(2) {
+#search #search-field #search-advanced-view #search-advanced-options div:nth-child(2),
+#search #search-field #search-advanced-view #search-advanced-options div:nth-child(3) {
   padding-top: 29px;
 }
 #evidenza header h2,

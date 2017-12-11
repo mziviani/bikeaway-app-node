@@ -5,6 +5,8 @@
   }*/
   #search #search-field #search-advanced-view #search-advanced-options div:nth-child(1) input[type='text'],
   #search #search-field #search-advanced-view #search-advanced-options div:nth-child(1) select,
+  #search #search-field #search-advanced-view #search-advanced-options div:nth-child(2) input[type='text'],
+  #search #search-field #search-advanced-view #search-advanced-options div:nth-child(2) select,
   #search-category input[type='text'] {
     height: auto;
     margin-bottom: 3px;
@@ -15,6 +17,7 @@
     padding: 3px 5px 3px 5px;
   }
   #search #search-field #search-advanced-view #search-advanced-options div:nth-child(1) input[type='text']:focus,
+  #search #search-field #search-advanced-view #search-advanced-options div:nth-child(2) input[type='text']:focus,
   #search-category input[type='text']:focus {
     border: 2px solid #ffc752;
   }
@@ -256,11 +259,14 @@
     line-height: 2.4rem;
     height: auto;
   }
-  #search #search-field #search-advanced-view #search-advanced-options div:nth-child(1) label {
+  #search #search-field #search-advanced-view #search-advanced-options div:nth-child(1) label,
+  #search #search-field #search-advanced-view #search-advanced-options div:nth-child(2) label {
     width: 70%;
   }
   #search #search-field #search-advanced-view #search-advanced-options div:nth-child(1) input[type='text'],
-  #search #search-field #search-advanced-view #search-advanced-options div:nth-child(1) select {
+  #search #search-field #search-advanced-view #search-advanced-options div:nth-child(1) select,
+  #search #search-field #search-advanced-view #search-advanced-options div:nth-child(2) input[type='text'],
+  #search #search-field #search-advanced-view #search-advanced-options div:nth-child(2) select {
     width: 30%;
     height: 30px;
   }
@@ -274,13 +280,12 @@
     #search #search-field #search-advanced-view #search-advanced-options div:nth-child(3) label {
       margin-bottom: 10px;
     }
-    #search #search-field #search-advanced-view #search-advanced-options div:nth-child(3)
-     {
-      margin-top: 10px;
-    }
+  
     #search #search-field #search-advanced-view #search-advanced-options div:nth-child(2) {
-      margin-top: 15px;
+      margin-top: 0px;
+      padding-top:20px;
     }
+
     /************* definire i campi di search ***********/
   #evidenza header h2,
   #percorsi header h2 {
