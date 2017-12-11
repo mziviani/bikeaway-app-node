@@ -443,6 +443,17 @@ var centroMappa = null;
 																								 //imposto lazione di ricentraggio della mappa in caso di resize
 																							 	addEventCentroMappa()
 
+																								//controllo gli articoli visibili e tolgo i pin degli articoli non visibi
+																								//serve quando si carica la pagina con filtri attivati
+																								var articoli = $("#result article:hidden")
+																								if(articoli.length>0) {
+																													$.each(articoli, function(key,value) {
+																														var id = $(value).data("id");
+																															pinMapCategory[id].setMap(null)
+
+																													})
+																								}
+
 																						 })
 																						 .fail(function(data) {
 																								 //in caso di errore nascondo la mappa
@@ -461,6 +472,7 @@ var centroMappa = null;
 
 			//verifico se ci sono dei filtri url attivi
 			attivaFiltriOnLoad()
+
 		}
 
 		function attivaFiltriOnLoad() {
@@ -506,7 +518,6 @@ var centroMappa = null;
 			if (flagLauch==true) {
 				attivaFiltro()
 			}
-
 		}
 
 		function attivaOrdinamento(e) {
@@ -697,7 +708,14 @@ function funzioneSort(type) {
 			//cambio url
 			window.history.pushState({}, window.document.title, "?"+$.param(queryObj));
 
-			attivaFiltro()
+			attivaFiltro();
+
+			//se è un cell attivare lo scroll fino a result
+			if (windowMobile()) {
+				$('html, body').animate({
+						 scrollTop:  $('#result').offset().top
+				 }, 500);
+			}
 		}
 
 
@@ -718,11 +736,14 @@ function attivaFiltro() {
 	//1 visualizza tutti i percorsi
 	articoli.show();
 
-	//visualizzo tutti i pin
+	//visualizzo tutti i pin, controlalndo che siano stati caricati
 	$.each(articoli, function(key,value) {
 		var id = $(value).data("id");
-		pinMapCategory[id].setMap(mapHome)
+		if (pinMapCategory[id] != undefined) {
+			pinMapCategory[id].setMap(mapHome)
+		}
 	})
+
 
 	// rimuovo eventuali messaggi precedenti
 	$("#msgResult").remove()
@@ -826,7 +847,6 @@ function attivaFiltro() {
 	})
 
 
-
 }
 //******* scheda *******//
 		function initScheda() {
@@ -838,6 +858,8 @@ function attivaFiltro() {
 
 			//azione per l'invio del campiCommento
 			$('#commenti #areaInserimento input[value="inserisci"]').click(inserisciCommento);
+
+
 
 			//carico gli alert
 			retriveAlert()

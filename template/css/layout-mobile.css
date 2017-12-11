@@ -80,6 +80,11 @@
   #search-category #side-search input[type='submit']:hover {
     background-color: #ffe9ba;
   }
+  #result #msgResult h2 {
+    font-size: 2.3rem;
+    margin-top: 50px;
+    margin-bottom: 50px;
+  }
 /*********************** scheda ************************/
 #other-pins div.row div {
   font-size: 1.3rem;
@@ -93,6 +98,18 @@
 #commenti div div #menu2 a,
 #commenti .corpo-commento {
   font-size: 1.3rem;
+  width: 100%;
+  display: table;
+  margin-bottom: 15px;
+}
+#commenti .corpo-commento .tappa {
+  width: 25px;
+  height: 25px;
+  float:left;
+}
+#commenti .corpo-commento .tappa + p {
+  float:right;
+  width: 93%;
 }
 #scheda #content aside h4 {
   font-size: 1.6rem;
