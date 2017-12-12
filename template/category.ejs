@@ -102,7 +102,7 @@
         <article class="col-sm-9 col-sm-pull-3" id="result">
             <div class="row">
               <%  percorsiObj[0]['percorsi'].forEach(function percorsi(obj) {%>
-                <article class="col-sm-6 percorso" data-id="<%=obj._id%>" data-bambini="<%= obj.scheda.bambini %>" data-lan="<%= obj.coordinates[0][0] %>" data-lon="<%= obj.coordinates[0][1] %>">
+                <article class="col-sm-6 percorso" data-id="<%=obj._id%>" data-bambini="<%= obj.scheda.bambini %>" data-lat="<%= obj.coordinates[0][0] %>" data-lng="<%= obj.coordinates[0][1] %>">
                     <a href="/<%= obj.scheda._idcategory + "/" + obj._id%>" tabindex="<%= tabindex %>">
                       <h3><%= obj['scheda']['title'] %></h3>
                         <section>

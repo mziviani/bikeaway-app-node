@@ -107,7 +107,7 @@
               <% } else {
                     serp.forEach(function category(percorsoObj) { %>
 
-                      <article class="col-sm-6 percorso" data-id="<%=percorsoObj['_id']%>" data-bambini="<%= percorsoObj['scheda']['bambini'] %>" data-lan="<%= percorsoObj['coordinates'][0][0]%>" data-lon="<%= percorsoObj['coordinates'][0][1]%>" >
+                      <article class="col-sm-6 percorso" data-id="<%=percorsoObj['_id']%>" data-bambini="<%= percorsoObj['scheda']['bambini'] %>" data-lat="<%= percorsoObj['coordinates'][0][0]%>" data-lng="<%= percorsoObj['coordinates'][0][1]%>" >
                           <a href="<%= percorsoObj['scheda']['_idcategory'] + '/' + percorsoObj['_id']+ "?type=search" %>" tabindex="<%= tabindex %>">
                             <h3><%= percorsoObj['scheda']['title'] %></h3>
                               <section>

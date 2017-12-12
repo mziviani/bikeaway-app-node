@@ -168,7 +168,9 @@
   .percorso .row.dettagli {
     margin-top: 3px;
   }
-
+  .percorso .row .gps-txt {
+    font-size: 1.5rem;
+  }
   /*.percorso:not(.highlight) section {
     border-left: 1px solid #9d0029;
     border-right: 1px solid #9d0029;
@@ -280,7 +282,7 @@
     #search #search-field #search-advanced-view #search-advanced-options div:nth-child(3) label {
       margin-bottom: 10px;
     }
-  
+
     #search #search-field #search-advanced-view #search-advanced-options div:nth-child(2) {
       margin-top: 0px;
       padding-top:20px;

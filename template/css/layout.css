@@ -809,6 +809,14 @@ body {
 .percorso .row .lunghezza {
   text-align: right;
 }
+.percorso .row .gps-txt {
+  color: #DC493C;
+  font-size: 12px;
+}
+.percorso .row .gps-txt img {
+  margin-right: 7px;
+  margin-left: 3px;
+}
 .percorso .row .lunghezza strong {
   background-color: #ffc752;
   display: inline-block;

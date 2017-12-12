@@ -76,7 +76,7 @@
                 </header>
 
                   <% var tabindex = 12; highlightObj.forEach(function hightlight(hObj) {%>
-                <section class="col-sm-4 percorso highlight">
+                <article class="col-sm-4 percorso highlight" data-lat="<%= hObj['coordinates'][0][0]%>" data-lng="<%= hObj['coordinates'][0][1]%>">
                   <a href="/<%= hObj['categoria'][0]['_id'] + '/' + hObj['_id'] %>"  tabindex="<%= tabindex %>">
                     <h3><%= hObj['scheda']['title'] %></h3>
                       <section>
@@ -94,7 +94,7 @@
                         <p><span class="glyphicon glyphicon-tags" aria-hidden="true"></span> <%= hObj['categoria'][0]['title'] %></p>
                     </section>
                   </a>
-                </section>
+                </article>
                 <% tabindex++ });  %>
               </section>
           </div>

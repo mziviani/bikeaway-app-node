@@ -286,32 +286,40 @@ var centroMappa = null;
 							clickable: false
 						});
 
-					definisciDistanzePercorsoGPS(latDefault,lngDefault)
+						//carico gli articoli centralli
+						var articoli = $("article.percorso");
+						$.each(articoli, function(key,value) {
+								var latArticolo = $(value).data("lat");
+								var lngArticolo = $(value).data("lng");
+
+								var distanza = definisciDistanzePercorsoGPS(latDefault,lngDefault,latArticolo,lngArticolo)
+
+								var areaHtml = $(value).find("section div.row div.col-md-9")
+								$('<br/><span class="gps-txt"><img src="/images/gps-small.png" alt="gps"/> '+distanza+' Km</span>').appendTo(areaHtml)
+						})
+
+						//rimuovo il margine inferiore alla header
+						$("#percorsi article.row > div header").css("margin-bottom","0px");
+
 				}
 
 
 		 }
 //calcolo distanze gps
 
-function definisciDistanzePercorsoGPS(lat,long) {
-	//carico gli articoli
-	var articoli = $("#percorsi article.percorso")
+function definisciDistanzePercorsoGPS(latA,lngA, latB,lngB) {
 
-	$.each(articoli, function(key,value) {
-			var latArt = $(value).data("lat");
-			var lngArt = $(value).data("lng");
 
-			var latRAD = (lat*2*Math.PI)/360;
-			var longRAD= (long*2*Math.PI)/360;
-			var latArtRAD= (latArt*2*Math.PI)/360;
-			var lngArtRAD= (lngArt*2*Math.PI)/360;;
+			var latArad = (latA*2*Math.PI)/360;
+			var lngArad= (lngA*2*Math.PI)/360;
+			var latBrad= (latB*2*Math.PI)/360;
+			var lngBrad= (lngB*2*Math.PI)/360;;
 
-			var distanza = 6372.795477598 * Math.acos(Math.sin(latArtRAD)*Math.sin(latRAD)+Math.cos(latArtRAD)*Math.cos(latRAD)*Math.cos(longRAD-lngArtRAD))
+			var distanza = 6372.795477598 * Math.acos(Math.sin(latArad)*Math.sin(latBrad)+Math.cos(latArad)*Math.cos(latBrad)*Math.cos(lngArad-lngBrad))
  			var distanzaRound = (Math.round(distanza*10)/10)
-			$('<div class="col-md-12"><img src="/images/gps.png" alt="distanza"/> '+distanzaRound+' Km</div>').appendTo(value)
-	})
-	//$('<div class="col-md-12">ciao</div>').appendTo(articoli)
-	//alert("ricalcolo")
+
+			return distanzaRound
+
 }
 			//immagine pin
 		 function pinMarker(type) {
@@ -429,6 +437,9 @@ function definisciDistanzePercorsoGPS(lat,long) {
 		 var pinMapCategory = [];
 
 		 function initMapCategory() {
+
+
+
 			var idcategory = window.location.pathname;
 			var search = window.location.search;
 			 idcategory = idcategory.replace("/","");
@@ -495,6 +506,13 @@ function definisciDistanzePercorsoGPS(lat,long) {
 																								 //imposto lazione di ricentraggio della mappa in caso di resize
 																							 	addEventCentroMappa()
 
+
+
+																								//controllo se è attivo il gps
+																								if (navigator.geolocation) {
+																										navigator.geolocation.getCurrentPosition(visualizzaGPScategory);
+																								}
+
 																								//controllo gli articoli visibili e tolgo i pin degli articoli non visibi
 																								//serve quando si carica la pagina con filtri attivati
 																								var articoli = $("#result article:hidden")
@@ -506,6 +524,8 @@ function definisciDistanzePercorsoGPS(lat,long) {
 																													})
 																								}
 
+
+
 																						 })
 																						 .fail(function(data) {
 																								 //in caso di errore nascondo la mappa
@@ -514,6 +534,8 @@ function definisciDistanzePercorsoGPS(lat,long) {
 
 
 		 }
+
+
 
 		function initCategory() {
 			var btnfiltri = $('#filter button');
@@ -524,6 +546,43 @@ function definisciDistanzePercorsoGPS(lat,long) {
 
 			//verifico se ci sono dei filtri url attivi
 			attivaFiltriOnLoad()
+
+		}
+
+		//carico altitutide e longitudine del gps
+		//attivo il flag globale su si gps
+		function visualizzaGPScategory(position) {
+			latDefault = position.coords.latitude;
+			lngDefault = position.coords.longitude;
+			gpsAPI = true;
+
+			//se il gps è attivo metto il pin gps e calcolo le distanze dei percorsi
+					var img = pinMarker(10);
+
+					var marker = new google.maps.Marker({
+						position: {lat: latDefault, lng: lngDefault},
+						map: mapHome,
+						icon: img,
+						clickable: false
+					});
+
+					//carico gli articoli centralli
+					var articoli = $("article.percorso");
+					$.each(articoli, function(key,value) {
+							var latArticolo = $(value).data("lat");
+							var lngArticolo = $(value).data("lng");
+
+							var distanza = definisciDistanzePercorsoGPS(latDefault,lngDefault,latArticolo,lngArticolo)
+
+							var areaHtml = $(value).find("section div.row div.col-md-9")
+							$('<br/><span class="gps-txt"><img src="/images/gps-small.png" alt="gps"/> '+distanza+' Km</span>').appendTo(areaHtml)
+					})
+
+					//attivo due nuove modalità di orginamento
+					$('<option value="6">Vicinanza Crescente</option>').appendTo("#orderInput")
+					$('<option value="7">Vicinanza Decrescente</option>').appendTo("#orderInput")
+
+
 
 		}
 
@@ -538,31 +597,34 @@ function definisciDistanzePercorsoGPS(lat,long) {
 			var selectDifficolta = $("#diff");
 			var inputCheckbox = $("#filter input[type='checkbox']");
 
+
 			if (queryRaw.length>0 && queryRaw.indexOf("=")>-1) {
 					queryObj = $.parseJSON('{"' + decodeURI(queryRaw).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}')
 			}
 
-			if (queryObj.lung!=null && !isNaN(parseFloat(queryObj.lung)) && parseFloat(queryObj.lung) != 0) {
+
+			if (queryObj!= null && queryObj.lung!=null && !isNaN(parseFloat(queryObj.lung)) && parseFloat(queryObj.lung) != 0) {
 				inputLung.val(parseFloat(queryObj.lung))
 				flagLauch = true
 			}
 
-			if (queryObj.pend!=null && !isNaN(parseFloat(queryObj.pend))) {
+
+			if (queryObj!= null && queryObj.pend!=null && !isNaN(parseFloat(queryObj.pend))) {
 				inputPend.val(parseFloat(queryObj.pend))
 				flagLauch = true
 			}
 
-			if (queryObj.type!=null && !isNaN(parseFloat(queryObj.type)) && parseFloat(queryObj.type) >=0 && parseFloat(queryObj.type)<= 4) {
+			if (queryObj!= null && queryObj.type!=null && !isNaN(parseFloat(queryObj.type)) && parseFloat(queryObj.type) >=0 && parseFloat(queryObj.type)<= 4) {
 				selectStrada.val(parseFloat(queryObj.type))
 				flagLauch = true
 			}
 
-			if (queryObj.diff!=null && !isNaN(parseFloat(queryObj.diff)) && parseFloat(queryObj.diff) >=0 && parseFloat(queryObj.diff)<= 3) {
+			if (queryObj!= null && queryObj.diff!=null && !isNaN(parseFloat(queryObj.diff)) && parseFloat(queryObj.diff) >=0 && parseFloat(queryObj.diff)<= 3) {
 				selectDifficolta.val(parseFloat(queryObj.diff))
 				flagLauch = true
 			}
 
-			if (queryObj.bambini!=null && !isNaN(parseFloat(queryObj.bambini)) && parseFloat(queryObj.bambini)== 1) {
+			if (queryObj!= null && queryObj.bambini!=null && !isNaN(parseFloat(queryObj.bambini)) && parseFloat(queryObj.bambini)== 1) {
 				$(inputCheckbox[0]).prop('checked', true);
 				flagLauch = true
 			}
@@ -683,6 +745,37 @@ function funzioneSort(type) {
 								}
 							}
 					break;
+					case 6:
+								freturn=function(a,b) {
+									var datia = $(a).find("section div.row div.col-md-9 span.gps-txt");
+									var datib = $(b).find("section div.row div.col-md-9 span.gps-txt");
+
+									var distA = parseFloat($(datia).text())
+									var distB = parseFloat($(datib).text())
+
+									if (distA < distB) {
+										return -1
+									} else {
+										return 1
+									}
+								}
+						break;
+
+						case 7:
+									freturn=function(a,b) {
+										var datia = $(a).find("section div.row div.col-md-9 span.gps-txt");
+										var datib = $(b).find("section div.row div.col-md-9 span.gps-txt");
+
+										var distA = parseFloat($(datia).text())
+										var distB = parseFloat($(datib).text())
+
+										if (distA < distB) {
+											return 1
+										} else {
+											return -1
+										}
+									}
+							break;
 
 	}
 
@@ -1191,12 +1284,22 @@ function initMapScheda() {
 												 addEventCentroMappa()
 
 
+												 //controllo se è attivo il gps
+												 //controllo se è attivo il gps
+													if (navigator.geolocation) {
+															navigator.geolocation.getCurrentPosition(visualizzaGPSscheda);
+													}
+
+
+
 												 //da elimminare
 												 mapHome.addListener('click', function(event) {
 
 																							 alert(event.latLng.lat()+" "+event.latLng.lng());
 
 																			 });
+
+
 
 									    }
 									});
@@ -1259,6 +1362,30 @@ function initMapScheda() {
 
 
 							})
+
+}
+
+function visualizzaGPSscheda(position) {
+	latGPS = position.coords.latitude;
+	lngGPS = position.coords.longitude;
+
+	//se il gps è attivo metto il pin gps e calcolo le distanze dei percorsi
+			var img = pinMarker(10);
+
+			var marker = new google.maps.Marker({
+				position: {lat: latDefault, lng: lngDefault},
+				map: mapHome,
+				icon: img,
+				clickable: false
+			});
+
+
+
+		var scheda = $("#content")
+		var distanza = definisciDistanzePercorsoGPS(latGPS,lngGPS,scheda.data("lat"),scheda.data("lng"))
+					var areaHtml = $("#content #dettagli")
+					$('<div class="col-sm-3" style="color:#DC493C;"><img src="/images/gps-small.png" alt="gps"/> '+distanza+' Km</div>').appendTo(areaHtml)
+
 
 }
 
