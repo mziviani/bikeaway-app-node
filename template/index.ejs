@@ -144,17 +144,24 @@
 
 
         <!-- pubblicità -->
+
+      <% if (annunciObj!= null) { %>
         <aside class="row" id="adv">
+          <header class="col-md-12">
+              <h5>Annunci</h5>
+          </header>
+          <% annunciObj.forEach(function annunci(aObj) {%>
             <div class="col-sm-4">
-              <p>pubblicità</p>
+              <a href="/annunci/<%= aObj['_id']%>" >
+                <h6><%= aObj['title']%></h6>
+                <p><%= aObj['text']%></p>
+                <p class="link"><%= aObj['dominiovisualizzato'] %></p>
+              </a>
             </div>
-            <div class="col-sm-4">
-              <p>pubblicità</p>
-            </div>
-            <div class="col-sm-4">
-              <p>pubblicità</p>
-            </div>
+            <%  }); %>
         </aside>
+        <% }%>
+
       </main>
 
       <div class="container-fluid">

@@ -11,6 +11,8 @@ var striptags = require('striptags');
 var bodyParser = require('body-parser');
 var akismet = require('akismet-api');
 var CronJob = require('cron').CronJob;
+var ObjectId = require('mongodb').ObjectID;
+
 
 
 
@@ -250,6 +252,38 @@ app.get("/cerca", function(req,res) {
   )
 
 })
+
+//annunci
+app.get("/annunci/:slag_id", function(req,res) {
+  var idAnnuncio = null
+
+  try {
+    idAnnuncio = ObjectId(req.params.slag_id)
+  } catch(err) {
+    idAnnuncio = null
+  }
+
+  //cerco il documento e aggiorno i click
+   baDB.collection("annunci").findOneAndUpdate(
+                                                { _id: ObjectId(idAnnuncio)},
+                                                 {$inc: { 'click': 1}},
+                                                 function(err,result) {
+                                                   if(err){
+                                                     res.redirect("/505");
+                                                     console.log("Errore in annunci -> " + err);
+                                                     return
+                                                   }
+
+                                                   if (idAnnuncio == null) {
+                                                     res.redirect("/404");
+                                                     return
+                                                   }
+
+                                                   res.redirect(result['value']['link']);
+
+                                                 }
+                                               )
+});
 
 //categoria -> output template html
 app.get("/:slag_category",function(req,res) {
@@ -871,8 +905,39 @@ app.get("/", function(req,res) {
                                               }
                                               callback(null,hightlight,category,searchStory);
                                           })
+        },
+        function(hightlight,category,searchStory,callback) {
+            //carico gli annunciin home 3
+            baDB.collection('annunci').find({"publish":true, "home":true}, {"title":1, "text":1, "dominiovisualizzato": 1})
+                                      .sort({"impression":1})
+                                      .limit(3)
+                                      .toArray(function(err,annunci) {
+                                                if (err || annunci.length<3) {
+                                                    callback(null,hightlight,category,searchStory,null);
+                                                    return
+                                                }
+
+                                                var idAnnunci =[];
+                                                annunci.forEach(function(a) {
+                                                      idAnnunci.push(a['_id'])
+                                                })
+
+
+                                                //incremento di 1 le impression delle pubblicità
+                                                baDB.collection("annunci").updateMany(
+                                                                    {_id: {$in:idAnnunci}},
+                                                                   {$inc: { 'impression': 1}}
+
+                                                                 )
+
+
+                                                callback(null,hightlight,category,searchStory,annunci);
+
+
+                                            })
+
         }
-      ], function (err, hightlight, category, searchStory) {
+      ], function (err, hightlight, category, searchStory,annunci) {
 
               if (err) {
                 res.redirect("/500");
@@ -884,12 +949,15 @@ app.get("/", function(req,res) {
                                                             description: "meta descrizione",
                                                              highlightObj: hightlight,
                                                              searchStoryObj: searchStory,
-                                                             categoryObj: category
+                                                             categoryObj: category,
+                                                             annunciObj: annunci
                                                            })
          })
 
 
 });
+
+
 
 
 
@@ -945,6 +1013,7 @@ app.get("/private/api/json/all/", function(req,res) {
 
 
 })
+
 
 //json ricerca
 app.get("/private/api/json/cerca", function(req,res) {

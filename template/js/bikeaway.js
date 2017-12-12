@@ -1373,7 +1373,7 @@ function visualizzaGPSscheda(position) {
 			var img = pinMarker(10);
 
 			var marker = new google.maps.Marker({
-				position: {lat: latDefault, lng: lngDefault},
+				position: {lat: latGPS, lng: lngGPS},
 				map: mapHome,
 				icon: img,
 				clickable: false
