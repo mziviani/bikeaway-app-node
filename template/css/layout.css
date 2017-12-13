@@ -394,7 +394,8 @@ body {
   padding: 0px;
 }
 #piede div.row section input[type='text'],
-#piede div.row section input[type='email'] {
+#piede div.row section input[type='email'],
+#piede div.row section #mce-EMAIL {
  text-align: center;
  height: 30px;
  padding: 0px 0px 0px 0px;
@@ -403,7 +404,13 @@ body {
  border-style: none;
  border-radius: 0px;
 }
-#piede div.row section button {
+#piede .mc-field-group,
+#piede #mc_embed_signup #mce-responses,
+#piede #mc_embed_signup .clear{
+  display:inline;
+}
+#piede div.row section button,
+#piede div.row section #mc-embedded-subscribe {
  background-color: #ffc752;
  border-width: 0px;
  border-style: none;

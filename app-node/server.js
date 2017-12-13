@@ -285,6 +285,8 @@ app.get("/annunci/:slag_id", function(req,res) {
                                                )
 });
 
+
+
 //categoria -> output template html
 app.get("/:slag_category",function(req,res) {
 
@@ -1142,6 +1144,56 @@ app.get("/private/api/json/cerca", function(req,res) {
 
 
   )
+})
+
+//json annunci scheda
+//annunci per percorso
+app.post("/private/api/json/annunci", function(req,res) {
+  var x1 = Number((req.body.lat1).trim());
+  var y1 = Number((req.body.lng1).trim());
+  var x2 = Number((req.body.lat2).trim());
+  var y2 = Number((req.body.lng2).trim());
+
+
+  //carico gli annunci all'interno delle coordinate
+  baDB.collection('annunci').find({
+     "coordinates": {
+       $geoWithin: {
+          $geometry: {
+             type: "Polygon" ,
+             coordinates: [
+               [ [x1,y1],[x2,y1],[x2, y2],[x1,y2],[x1,y1] ]
+             ]
+          }
+        }
+       },"publish":true },
+      {_id:1, "title":1, "text":1, "dominiovisualizzato":true, "coordinates":1}
+   ).toArray(function(err,result) {
+     res.header("Access-Control-Allow-Origin", "http://localhost:8080/");
+     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+     res.setHeader('Content-Type', 'application/json');
+
+      if (err) {
+        console.log("Errore /private/api/json/all/ ->" +err);
+        res.end(JSON.stringify({error: true}));
+        return
+      }
+
+      var idAnnunci =[];
+      result.forEach(function(a) {
+            idAnnunci.push(a['_id'])
+      })
+
+
+      //incremento di 1 le impression delle pubblicità
+      baDB.collection("annunci").updateMany(
+                          {_id: {$in:idAnnunci}},
+                         {$inc: { 'impression': 1}}
+                       )
+
+      res.end(JSON.stringify(result));
+  });
+
 })
 
 //json per caricare tutti i percorsi di una categoria

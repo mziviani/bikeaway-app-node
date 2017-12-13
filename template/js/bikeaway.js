@@ -1313,7 +1313,7 @@ function initMapScheda() {
 
 																			 });
 
-
+												retriveAnnunciScheda(mapHome.getBounds())
 									    }
 									});
 
@@ -1689,6 +1689,49 @@ function toggleBar() {
 
 }
 
+/***************** annunci singolo percorso *****************/
+function retriveAnnunciScheda(area) {
+	var coordinate = area.toJSON()
+	$.post("/private/api/json/annunci", {lat1: coordinate["south"], lng1: coordinate["west"], lat2: coordinate["north"], lng2:coordinate["east"]}, "json" )
+				.done(function(data) {
+
+
+
+							if (data!="") {
+								var tabindex=12;
+								var counter=1;
+								var img = pinMarker(1);
+
+								var html = '<div class="background-yellow">'
+										html += '<h3>Annunci</h3>'
+
+
+								$.each(data, function(key,value){
+										html+='<h4>'+value['title']+'</h4>'
+										html+='<p>'+value['text']
+										html+='<br/><a href="/annunci/'+value['_id']+'" tabindex="'+tabindex+'">vai al sito</a></p>'
+										tabindex++;
+
+										//aggingi marker
+										var marker = new google.maps.Marker({
+												position: {lat: value['coordinates'][0], lng: value['coordinates'][1]},
+												map: mapHome,
+												label: {text: " ", color:'white'},
+												icon: img,
+												clickable: false
+											});
+
+										marker.label.text = counter
+										counter++
+
+									})
+							}
+
+							html += '</div>'
+							$(html).appendTo("#annunci")
+				})
+
+}
 
 
 /********************** ALTRO *******************/
