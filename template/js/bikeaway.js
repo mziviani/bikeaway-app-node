@@ -1016,6 +1016,18 @@ function attivaFiltro() {
 
 		function campiCommento(e) {
 			e.preventDefault();
+			var area = $('#commenti #areaInserimento')
+			var bottone = $('#commenti #menu2 a')
+
+			if(area.css("display")!="none") {
+				bottone.text("Inserisci commento")
+
+			} else {
+				bottone.text("Chiudi area commenti")
+
+
+			}
+
 			$('#commenti #areaInserimento').slideToggle();
 		}
 
@@ -1120,7 +1132,9 @@ function apriCommentidaTappa(e,n) {
 	 }, 500);
 
 	//apro l'area commenti
-	$('#commenti #areaInserimento').slideDown();
+	if ($("#areaInserimento").css('display') == "none") {
+		$("#commenti #menu2 a").click()
+	}
 	//imposto la tappa di inserimento
 	$('#commenti #areaInserimento #typec').val(n);
 
@@ -1298,7 +1312,6 @@ function initMapScheda() {
 																							 alert(event.latLng.lat()+" "+event.latLng.lng());
 
 																			 });
-
 
 
 									    }

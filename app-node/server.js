@@ -1269,7 +1269,7 @@ app.get("/private/api/json/attivita/:slag_percorso", function(req,res) {
   var idPercorso = req.params.slag_percorso;
 
   //carico gli alert specifici del percorsi
-  baDB.collection('parcheggi').find({"_idPercorso" : idPercorso}, {_id:0, "_idPercorso":0, "location.type":0})
+  baDB.collection('attivita').find({"_idPercorso" : idPercorso}, {_id:0, "_idPercorso":0, "location.type":0})
                           .toArray(function(err, result) {
                             res.header("Access-Control-Allow-Origin", "http://localhost:8080/");
                             res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
