@@ -1168,7 +1168,9 @@ app.post("/private/api/json/annunci", function(req,res) {
         }
        },"publish":true },
       {_id:1, "title":1, "text":1, "dominiovisualizzato":true, "coordinates":1}
-   ).toArray(function(err,result) {
+   ).sort({"impression":1})
+    .limit(5)
+     .toArray(function(err,result) {
      res.header("Access-Control-Allow-Origin", "http://localhost:8080/");
      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
      res.setHeader('Content-Type', 'application/json');

@@ -422,6 +422,9 @@
   #piede div.row section button {
     font-size: 2rem;
   }
+  #annunci {
+    margin-bottom: 20px;
+  }
   /******************* category *********/
   #search-category h4  {
     font-size: 2rem;
@@ -501,7 +504,8 @@
     padding-top: 5px;
     padding-bottom: 5px;
   }
-  #commenti .corpo-commento {
+  #scheda #content #commenti  #listacommenti .corpo-commento,
+  #scheda #content #commenti  #listacommenti .corpo-commento p {
     font-size: 1.6rem;
   }
 }

@@ -1058,11 +1058,11 @@ function attivaFiltro() {
 
 			$.post("/private/api/json/commento/upload", {_idPercorso: idPercorso, autore: autore, mail: mail, commento: commento, tappa: tappa}, "json" )
 						.done(function(data) {
-								var result = JSON.parse(data)
+
 								var txt
 								var classe
 
-								switch(result.code) {
+								switch(data.code) {
 									case 1:
 										txt = "I dati inseriti non sono validi.";
 										classe ="error";
@@ -1082,12 +1082,13 @@ function attivaFiltro() {
 
 									chiusuraCommenti(classe,txt, function() {
 										//aggiornare la paginazione + inserire il commento
-										if (result.code==3) {
+										if (data.code==3) {
 											allComments.unshift({"data": new Date(Date.now()), "autore": autore, "commento": commento, "tappa":tappa})
 										}
 
 										//imposto la visualizzazione su tutti
 										$('#commentType').val(-1).change();
+
 
 									})
 
@@ -1116,7 +1117,6 @@ function chiusuraCommenti(classe, txt, callback) {
 																				var mail = $("#commenti #areaInserimento #email").val("");
 																				var commento = $("#commenti #areaInserimento #commento").val("");
 																				var tappa = $("#commenti #areaInserimento #typec").val(0);
-
 																				callback()
 																				});
 
@@ -1218,8 +1218,8 @@ function initMapScheda() {
 									} else  {
 
 										/*addMarker(mapHome,value[0],value[1],data[0]['scheda']['tappe'][key][1],2,tappa);
-										tappa++
-										*/
+										tappa++*/
+
 
 										wayout.push({
 																location: new google.maps.LatLng({lat: value[0], lng: value[1]}),
@@ -1313,6 +1313,16 @@ function initMapScheda() {
 
 																			 });
 
+												//se cambiano i confini vengono ricaricati gli annunci
+												mapHome.addListener('bounds_changed', function(event) {
+																						//nascondo gli Annunci
+																					//	$('#base-annunci').fadeOut(function() {
+
+																							//ricarico gli annunci
+																							retriveAnnunciScheda(mapHome.getBounds())
+																					//	})
+																			})
+
 												retriveAnnunciScheda(mapHome.getBounds())
 									    }
 									});
@@ -1338,7 +1348,7 @@ function initMapScheda() {
 
 
 									if(data['error']==true || data['commenti']==0) {
-										listaCommenti.append('<article class="col-sm-9 corpo-commento"><p><strong>Nessun commento inserito</strong></p></article>');
+										listaCommenti.append('<article class="col-sm-12 corpo-commento"><p><strong>Nessun commento inserito</strong></p></article>');
 										return
 									}
 
@@ -1690,23 +1700,36 @@ function toggleBar() {
 }
 
 /***************** annunci singolo percorso *****************/
+var annunciMarker = [];
 function retriveAnnunciScheda(area) {
 	var coordinate = area.toJSON()
+	var alfabeto= ["A","B","C", "D", "E", "F", "G", "H", "I", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "Z"]
 	$.post("/private/api/json/annunci", {lat1: coordinate["south"], lng1: coordinate["west"], lat2: coordinate["north"], lng2:coordinate["east"]}, "json" )
 				.done(function(data) {
 
+							//rimuovo eventuali vecchi annunci
+							$("#base-annunci").remove()
+							//rimuovo i pins
+							$.each(annunciMarker, function(key,value) {
+										value.setMap(null)
+							})
+
+							//svuoto l'array
+							annunciMarker=[]
 
 
 							if (data!="") {
 								var tabindex=12;
-								var counter=1;
+								var counter= 0;
 								var img = pinMarker(1);
 
-								var html = '<div class="background-yellow">'
+
+
+								var html = '<div class="background-yellow" id="base-annunci">'
 										html += '<h3>Annunci</h3>'
 
-
 								$.each(data, function(key,value){
+
 										html+='<h4>'+value['title']+'</h4>'
 										html+='<p>'+value['text']
 										html+='<br/><a href="/annunci/'+value['_id']+'" tabindex="'+tabindex+'">vai al sito</a></p>'
@@ -1721,14 +1744,18 @@ function retriveAnnunciScheda(area) {
 												clickable: false
 											});
 
-										marker.label.text = counter
+										marker.label.text = alfabeto[counter];
+
+										annunciMarker.push(marker);
 										counter++
 
 									})
+
+									html += '</div>'
+									$(html).appendTo("#annunci")
 							}
 
-							html += '</div>'
-							$(html).appendTo("#annunci")
+
 				})
 
 }
