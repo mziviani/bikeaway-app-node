@@ -222,11 +222,15 @@ body {
   padding-top: 29px;
 }
 #evidenza header h2,
-#percorsi header h2 {
+#percorsi header h2,
+#informativo header h2 {
   margin: 16px 0px 16px 0px;
   text-align: left;
   color: #9d0029;
   font-size: 30px;
+}
+#informativo h3 {
+  font-size: 18px;
 }
 /* stili percorsi home*/
 #percorsi article.row {
@@ -940,3 +944,5 @@ p.tagsmap a {
 p.tagsmap a:hover {
   color: #ffc752;
 }
+/*************** pag informative *************/
+#informativo

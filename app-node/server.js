@@ -37,8 +37,8 @@ mongoClient.connect(url, function(err, db) {
 
 //verifica akismet
 var clientAki = akismet.client({
-  key  : '98d8beff97bd',                   // Required!
-  blog : 'http://localhost'       // Required!
+  key  : '98d8beff97bd',
+  blog : 'http://localhost'
 });
 
 //scrivo sul log il risultato per verificare la key di akistmet
@@ -95,17 +95,54 @@ app.use('/user/:id', function (req, res, next) {
 
 //non trova la path -> output template html
 app.get("/404", function(req,res) {
-    res.status(404);
-    res.render(__dirname + "/../template/404", {
-        title:  "Ops pagina non trovata | " ,
-        description: "meta descrizione categoria",
-        code: "404"
-    } )
+
+  baDB.collection("category").find({"publish":true},{"publish":0, "order":0})
+                              .sort({"order":1})
+                            .toArray(function(err, result) {
+
+                              if(err) {
+                                  res.redirect("/505");
+                                  return;
+                              }
+
+
+
+                              res.status(404)
+                              res.render(__dirname + "/../template/404", {
+                                  title: "404 la pagina non è più disponibile",
+                                  description: "meta descrizione categoria",
+                                  categoryObj: result
+                              } )
+
+                          })
+
+
+
+
 })
+
+
 
 app.get("/500", function(req,res) {
     res.status(500);
-    res.end("ERRORE 500");
+    res.render(__dirname + "/../template/505", {
+        title: "404 la pagina non è più disponibile",
+        description: "meta descrizione categoria",
+    } )
+})
+
+app.get("/private-policy", function(req,res) {
+  res.render(__dirname + "/../template/private-policy", {
+      title: "Private Policy",
+      description: "meta descrizione categoria",
+  } )
+})
+
+app.get("/help-center", function(req,res) {
+  res.render(__dirname + "/../template/help-center", {
+      title: "Help Center",
+      description: "meta descrizione categoria",
+  } )
 })
 
 //cerca
@@ -1502,7 +1539,7 @@ app.get("/private/api/json/:slag_category/:slag_percorso/", function(req,res) {
 
 //in caso di URI non definiti -> redirect con errore 404
 app.get("*", function(req,res) {
-    res.redirect("/404");
+  res.redirect("/404")
 })
 
 //cronjop per eliminare gli alert ogni 60 gg

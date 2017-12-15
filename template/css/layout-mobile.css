@@ -39,7 +39,8 @@
     padding-top: 5px;
     padding-bottom: 5px;
   }
-  #piede div.row section button {
+  #piede div.row section button,
+  #piede div.row section #mc-embedded-subscribe  {
     width: 100%;
     padding-top: 5px;
     padding-bottom: 5px;
@@ -83,7 +84,8 @@
   #search-category #side-search input[type='submit']:hover {
     background-color: #ffe9ba;
   }
-  #result #msgResult h2 {
+  #result #msgResult h2,
+  #result #noResult h2  {
     font-size: 2.3rem;
     margin-top: 50px;
     margin-bottom: 50px;
@@ -290,11 +292,14 @@
 
     /************* definire i campi di search ***********/
   #evidenza header h2,
-  #percorsi header h2 {
-    margin: 16px 0px 16px 0px;
-    text-align: left;
-    color: #9d0029;
+  #percorsi header h2,
+  #informativo header h2 {
+
     font-size: 3.5rem;
+  }
+
+  #informativo p {
+      font-size: 1.3rem
   }
   /********** definizione percorsi short ****************/
   .percorso {
@@ -419,7 +424,8 @@
   #piede div.row section input[type='email'] {
     font-size: 2rem;
   }
-  #piede div.row section button {
+  #piede div.row section button,
+  #piede div.row section #mc-embedded-subscribe {
     font-size: 2rem;
   }
   #annunci {
@@ -508,4 +514,24 @@
   #scheda #content #commenti  #listacommenti .corpo-commento p {
     font-size: 1.6rem;
   }
+  /* pubblicità */
+  #adv div {
+
+    margin-bottom: 20px;
+  }
+  #adv h5 {
+    font-size: 1.5rem;
+  }
+
+  #adv div a h6 {
+    font-size: 2rem;
+
+  }
+
+  #adv div a p {
+    font-size: 1.8rem;
+
+  }
+
+
 }

@@ -972,7 +972,7 @@ function attivaFiltro() {
 
 	if(nArticoli-nArticoliVisibili==nArticoli && nArticoli>0) {
 		var a = $("#result div.row:nth-child(1)");
-		$("<div id=\"msgResult\" class=\"col-md-12\"><h2 id=\"msgResult\">Nessun risultato per i filtri impostati</h2></div>").prependTo(a[0]);
+		$("<div id=\"msgResult\" class=\"col-md-12\"><h2>Nessun risultato per i filtri impostati</h2></div>").prependTo(a[0]);
 
 		articoli = $("#result article");
 		//nascondere tutti i pin della mappa
