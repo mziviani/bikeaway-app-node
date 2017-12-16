@@ -346,6 +346,11 @@ body {
 #adv div a p.link {
   color: #9d0029;
 }
+#annunci div {
+
+  margin-bottom: 20px;
+}
+
 
 /* piede */
 #piede div.row {
