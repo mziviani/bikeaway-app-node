@@ -1730,9 +1730,10 @@ function retriveAnnunciScheda(area) {
 
 								$.each(data, function(key,value){
 
-										html+='<h4>'+value['title']+'</h4>'
+										html+='<a href="/annunci/'+value['_id']+'"><h4>'+value['title']+'</h4>'
 										html+='<p>'+value['text']
-										html+='<br/><a href="/annunci/'+value['_id']+'" tabindex="'+tabindex+'">vai al sito</a></p>'
+										//html+='<br/><a href="/annunci/'+value['_id']+'" tabindex="'+tabindex+'">vai al sito</a></p>'
+										html+="</p></a>"
 										tabindex++;
 
 										//aggingi marker

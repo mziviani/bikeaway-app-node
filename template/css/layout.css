@@ -664,11 +664,11 @@ body {
   font-size: 14px;
   color: #666;
 }
-#scheda #content aside p a {
+/*#scheda #content aside p a {
   color: #406599;
-}
-#scheda #content aside p a:hover {
-  text-decoration: underline;
+}*/
+#scheda #content aside a:hover {
+  text-decoration: none;
 }
 #commenti header h2 {
   color: #9d0029;
