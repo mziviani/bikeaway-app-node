@@ -64,35 +64,6 @@ app.use(bodyParser.urlencoded({ extended: false }))
 //set cookieParser
 app.use(cookieParser());
 
-//MIDDLEWARE **********************************************************************************
-//example middelware
-/*app.use(function (req, res, next) {
-  console.log('Time:', Date.now());
-  next();
-});
-//middleware su url
-app.use('/user/:id', function (req, res, next) {
-  console.log('Request Type:', req.method);
-  next();
-});*/
-
-//middleware per memorizzare la ricerca !!!
-// middleware app o router ???
-
-
-//middleware con doppia funzione utile per 404
-/*app.get('/user/:id', function (req, res, next) {
-  // if the user ID is 0, skip to the next route
-  if (req.params.id == 0) next('route');
-  // otherwise pass the control to the next middleware function in this stack
-  else next(); //
-}, function (req, res, next) {
-  // render a regular page
-  res.render('regular');
-});*/
-//MIDDLEWARE **********************************************************************************
-
-
 //non trova la path -> output template html
 app.get("/404", function(req,res) {
 
@@ -126,7 +97,7 @@ app.get("/404", function(req,res) {
 app.get("/500", function(req,res) {
     res.status(500);
     res.render(__dirname + "/../template/505", {
-        title: "404 la pagina non è più disponibile",
+        title: "Errore server interno",
         description: "meta descrizione categoria",
     } )
 })
@@ -1553,14 +1524,6 @@ new CronJob('00 00 02 * * *', function() {
   console.log("Pulizia degli alert minori del " + data60gg);
 }, null, true);
 
-
-//to do
-// -> parte amministrativa ? (no)
-//realizzare pagine statiche (contatti, help center ecc...)
-// realizzare redirect /505
-// api mailchimp
-// sistemare filtering con javascript
-//sistemre il filtro della scheda sul cellulare
 
 
 app.listen(8080);
