@@ -43,7 +43,8 @@ function resizeLarghezzaSearch() {
 }
 
 //set visibilità ed etichetta filtri avanzati
-function visualizzaFiltriAvanzati() {
+function visualizzaFiltriAvanzati(e) {
+	e.preventDefault()
 	//ricalcolo la larghezza sumobile
 	resizeLarghezzaSearch()
 
@@ -642,16 +643,24 @@ function definisciDistanzePercorsoGPS(latA,lngA, latB,lngB) {
 			//rimuovo gli articoli
 			$('#result div article').remove()
 
+			//aggiungo il loader
+			//disabilito il select
+			$("#orderInput").attr("disabled","disabled")
+			addLoader()
 
 			var fsort = funzioneSort(obj.val());
 
 			//funzione di sort
 			articoli.sort(fsort)
 
+			setTimeout(function(){
+																	removeLoader()
+																	$(articoli).appendTo("#result div")
+																	//abilito il select
+																		$("#orderInput").removeAttr("disabled")
+															}, 1000);
 
-			//isnerisco gli articoli
-			//$('#result div').html(articoli);
-			$(articoli).appendTo("#result div")
+
 			}
 
 //0 alfabetico Crescente
@@ -878,121 +887,138 @@ function attivaFiltro() {
 	var articoli = $("#result article");
 	var nArticoli = $("#result article").length
 
-	//1 visualizza tutti i percorsi
-	articoli.show();
 
-	//visualizzo tutti i pin, controlalndo che siano stati caricati
-	$.each(articoli, function(key,value) {
-		var id = $(value).data("id");
-		if (pinMapCategory[id] != undefined) {
-			pinMapCategory[id].setMap(mapHome)
-		}
-	})
+				//1 visualizza tutti i percorsi
+																					articoli.show();
 
-
-	// rimuovo eventuali messaggi precedenti
-	$("#msgResult").remove()
-
-	if (!isNaN(inputLungVal)) {
-		$.each(articoli, function(key, value) {
-						var strongArticoli = $(value).find("section strong");
-						var lunghezza = parseFloat($(strongArticoli[0]).text())
-
-						if (lunghezza > inputLungVal ) {
-							$(value).hide();
-						}
+																					//visualizzo tutti i pin, controlalndo che siano stati caricati
+																					$.each(articoli, function(key,value) {
+																						var id = $(value).data("id");
+																						if (pinMapCategory[id] != undefined) {
+																							pinMapCategory[id].setMap(mapHome)
+																						}
+																					})
 
 
-		})
-	}
+																					// rimuovo eventuali messaggi precedenti
+																					$("#msgResult").remove()
 
-	//2 ricarico glli articoli visibili
-	articoli = $("#result article:visible");
+																					if (!isNaN(inputLungVal)) {
+																						$.each(articoli, function(key, value) {
+																										var strongArticoli = $(value).find("section strong");
+																										var lunghezza = parseFloat($(strongArticoli[0]).text())
 
-	if (!isNaN(inputPendVal)) {
-		$.each(articoli, function(key, value) {
-						var strongArticoli = $(value).find("section strong");
-						var pendenza = parseFloat($(strongArticoli[2]).text())
-
-						if (pendenza > inputPendVal) {
-							$(value).hide();
-						}
+																										if (lunghezza > inputLungVal ) {
+																											$(value).hide();
+																										}
 
 
-		})
-	}
+																						})
+																					}
 
-	//3 ricarico gli articoli visibili
-	articoli = $("#result article:visible");
-	var tipoStrada = ["", "asfalto", "terra", "ghiaia", "misto"]
+																					//2 ricarico glli articoli visibili
+																					articoli = $("#result article:visible");
 
-	if (selectStrada.val()!=0) {
-		$.each(articoli, function(key, value) {
-						var strongArticoli = $(value).find("section strong");
-						var strada = $(strongArticoli[3]).text().trim()
+																					if (!isNaN(inputPendVal)) {
+																						$.each(articoli, function(key, value) {
+																										var strongArticoli = $(value).find("section strong");
+																										var pendenza = parseFloat($(strongArticoli[2]).text())
 
-						if (strada != tipoStrada[selectStrada.val()]) {
-							$(value).hide();
-						}
-
-
-		})
-	}
-
-	//4 ricarico gli articoli visibili
-	articoli = $("#result article:visible");
-	var difficolta = [0, 1,2,3];
-
-	if (selectDifficolta.val()!=0) {
-		$.each(articoli, function(key, value) {
-						var diff = $(value).find("span.full");
-
-						if (diff.length!=selectDifficolta.val()) {
-							$(value).hide();
-						}
+																										if (pendenza > inputPendVal) {
+																											$(value).hide();
+																										}
 
 
-		})
-	}
+																						})
+																					}
 
-	//5 ricarico gli articoli visibili
-	articoli = $("#result article:visible");
+																					//3 ricarico gli articoli visibili
+																					articoli = $("#result article:visible");
+																					var tipoStrada = ["", "asfalto", "terra", "ghiaia", "misto"]
 
-	if(inputCheckbox[0].checked) {
-		$.each(articoli, function(key, value) {
-						var bambini = $(value).data("bambini");
+																					if (selectStrada.val()!=0) {
+																						$.each(articoli, function(key, value) {
+																										var strongArticoli = $(value).find("section strong");
+																										var strada = $(strongArticoli[3]).text().trim()
 
-						if (bambini!=true) {
-							$(value).hide();
-						}
-		})
-	}
+																										if (strada != tipoStrada[selectStrada.val()]) {
+																											$(value).hide();
+																										}
 
-	var nArticoliVisibili = $("#result article:visible").length
 
-	if(nArticoli-nArticoliVisibili==nArticoli && nArticoli>0) {
-		var a = $("#result div.row:nth-child(1)");
-		$("<div id=\"msgResult\" class=\"col-md-12\"><h2>Nessun risultato per i filtri impostati</h2></div>").prependTo(a[0]);
+																						})
+																					}
 
-		articoli = $("#result article");
-		//nascondere tutti i pin della mappa
-		$.each(articoli, function(key,value) {
-			var id = $(value).data("id");
-			pinMapCategory[id].setMap(null)
-		})
-		return;
-	}
+																					//4 ricarico gli articoli visibili
+																					articoli = $("#result article:visible");
+																					var difficolta = [0, 1,2,3];
 
-	//carico gli id degli articoli non visibili e li nascondo nella mappa
-	var nArticoliNonVisibili = $("#result article:hidden");
+																					if (selectDifficolta.val()!=0) {
+																						$.each(articoli, function(key, value) {
+																										var diff = $(value).find("span.full");
 
-	$.each(nArticoliNonVisibili, function(key, value) {
-			var id = $(value).data("id");
-			pinMapCategory[id].setMap(null);
-	})
+																										if (diff.length!=selectDifficolta.val()) {
+																											$(value).hide();
+																										}
+
+
+																						})
+																					}
+
+																					//5 ricarico gli articoli visibili
+																					articoli = $("#result article:visible");
+
+																					if(inputCheckbox[0].checked) {
+																						$.each(articoli, function(key, value) {
+																										var bambini = $(value).data("bambini");
+
+																										if (bambini!=true) {
+																											$(value).hide();
+																										}
+																						})
+																					}
+
+																					var nArticoliVisibili = $("#result article:visible").length
+
+																					if(nArticoli-nArticoliVisibili==nArticoli && nArticoli>0) {
+																						var a = $("#result div.row:nth-child(1)");
+																						$("<div id=\"msgResult\" class=\"col-md-12\"><h2>Nessun risultato per i filtri impostati</h2></div>").prependTo(a[0]);
+
+																						articoli = $("#result article");
+																						//nascondere tutti i pin della mappa
+																						$.each(articoli, function(key,value) {
+																							var id = $(value).data("id");
+																							pinMapCategory[id].setMap(null)
+																						})
+																						return;
+																					}
+
+																					//carico gli id degli articoli non visibili e li nascondo nella mappa
+																					var nArticoliNonVisibili = $("#result article:hidden");
+
+																					$.each(nArticoliNonVisibili, function(key, value) {
+																							var id = $(value).data("id");
+																							pinMapCategory[id].setMap(null);
+																					})
+
 
 
 }
+
+
+
+function addLoader() {
+	//rimuovo eventuale LOADER
+	console.log("inserito");
+	$("#result #loader").remove()
+	$('<div class="col-md-12" id="loader"><img src="/images/spinner.gif" alt="spinner"/><br/>Ordinamento</div>').appendTo("#result > div")
+}
+function removeLoader() {
+	//rimuovo eventuale LOADER
+	console.log("rimosso");
+	$("#loader").remove()
+}
+
 //******* scheda *******//
 		function initScheda() {
 
@@ -1081,20 +1107,19 @@ function attivaFiltro() {
 								}
 
 									chiusuraCommenti(classe,txt, function() {
+
 										//aggiornare la paginazione + inserire il commento
 										if (data.code==3) {
 											allComments.unshift({"data": new Date(Date.now()), "autore": autore, "commento": commento, "tappa":tappa})
 										}
 
+
 										//imposto la visualizzazione su tutti
-										$('#commentType').val(-1).change();
+										$('#commentType').val(-1)
+										filtraCommentiChange(e)
 
 
 									})
-
-
-
-
 
 						})
 						.fail(function(data) {
@@ -1147,8 +1172,8 @@ function apriCommentidaTappa(e,n) {
 
 var directionsDisplay;
 var directionsService;
-var allComments;
-var paginazioneObj;
+var allComments = [];
+var paginazioneObj = null;
 
 function initMapScheda() {
 	var url = window.location.pathname ;
@@ -1413,7 +1438,7 @@ function visualizzaGPSscheda(position) {
 }
 
 function filtraCommentiChange(e) {
-	var dd = $(e.target);
+	var dd = $("#commentType");
 	var scelta = parseInt(dd.val());
 
 	var containerPag = $('#paginazione');
@@ -1424,9 +1449,10 @@ function filtraCommentiChange(e) {
 																//nascondo tutti i commenti e poi li distruggo
 																articoli.remove()
 
-																//distruggo la vecchia paginazione
-																paginazioneObj.pagination('destroy')
-
+																if (paginazioneObj != null) {
+																	//distruggo la vecchia paginazione
+																	paginazioneObj.pagination('destroy')
+																}
 
 																//pulisco la sorgetnte dati di paginazione
 																var result = [];
@@ -1450,7 +1476,13 @@ function filtraCommentiChange(e) {
 																		//salvo nel globale la nuova paginazioneObj
 																		paginazioneObj = containerPag
 																} else {
-																		dataContainer.append('<article class="col-sm-9 corpo-commento"><p>Nessun commento per la <strong>tappa '+scelta+	'</strong></p></article>')
+																		var txt = "per la <strong>tappa " + scelta+"</strong>";
+
+																		if (scelta == 0) {
+																			 txt = "<strong>Generale</strong>"
+																		}
+
+																		dataContainer.append('<article class="col-sm-9 corpo-commento"><p>Nessun commento '+txt+'</p></article>')
 
 																}
 
