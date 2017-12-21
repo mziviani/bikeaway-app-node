@@ -1,0 +1,5 @@
+{ "_id" : "sports", "title" : "Sports", "publish" : true, "image" : "sport.jpg", "order" : 9 }
+{ "_id" : "relax", "title" : "Relax", "publish" : true, "image" : "relax.jpg", "order" : 2 }
+{ "_id" : "cittaepaesi", "title" : "Città e paesi", "publish" : false, "image" : "cittaepaesi.jpg", "order" : 9 }
+{ "_id" : "test", "title" : "test", "publish" : false, "image" : null, "order" : 9 }
+{ "_id" : "cultura", "title" : "Cultura", "publish" : true, "image" : "cittaepaesi.jpg", "order" : 1 }
